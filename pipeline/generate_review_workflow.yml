@@ -1,0 +1,51 @@
+# GitHub Actions 워크플로 템플릿
+# 깃허브 웹에서 .github/workflows/generate_review.yml 경로로 복사해 두시면
+# Actions 탭에서 버튼 클릭 한 번으로 새 논문 리뷰를 자동 생성할 수 있습니다.
+
+name: Generate AI Paper Review & Shorts via Claude
+
+on:
+  workflow_dispatch:
+    inputs:
+      arxiv_id:
+        description: 'arXiv Paper ID (e.g. 2505.06120)'
+        required: true
+        default: '2505.06120'
+      model:
+        description: 'Claude Model'
+        required: false
+        default: 'claude-3-7-sonnet-20250219'
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Claude Generator
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          python pipeline/generate.py --arxiv-id "${{ github.event.inputs.arxiv_id }}" --model "${{ github.event.inputs.model }}"
+
+      - name: Commit & Push generated review
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add _posts/ shorts/
+          git diff --staged --quiet || (git commit -m "feat: new review for arXiv:${{ github.event.inputs.arxiv_id }} [skip ci]" && git push)
