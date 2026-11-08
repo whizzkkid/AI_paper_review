@@ -24,10 +24,22 @@ layout: default
     {{ content }}
   </div>
 
+  {% if page.youtube_id and page.youtube_id != "" %}
+  <section style="margin-top: 50px; padding: 24px; background: var(--card-bg); border-radius: 8px; border: 1px solid var(--border); text-align: center;">
+    <h4 style="margin-top: 0; color: #fff;">🎬 이 논문의 60초 쇼츠</h4>
+    <div style="max-width: 340px; aspect-ratio: 9 / 16; margin: 16px auto;">
+      <iframe src="https://www.youtube-nocookie.com/embed/{{ page.youtube_id }}" title="{{ page.title | escape }}"
+        style="width: 100%; height: 100%; border: 0; border-radius: 12px;" loading="lazy"
+        allow="accelerometer; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+    </div>
+    <a href="https://youtube.com/shorts/{{ page.youtube_id }}" target="_blank" rel="noopener">YouTube에서 보기 →</a>
+  </section>
+  {% else %}
   <div style="margin-top: 50px; padding: 20px; background: var(--card-bg); border-radius: 8px; border: 1px solid var(--border);">
     <h4 style="margin-top: 0; color: #fff;">🎬 이 논문의 60초 쇼츠 영상</h4>
     <p style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 0;">
-      유튜브 쇼츠 / 인스타그램 릴스에서 본 논문의 60초 핵심 요약 영상을 만나보실 수 있습니다.
+      유튜브 쇼츠에서 본 논문의 60초 핵심 요약 영상을 만나보실 수 있습니다.
     </p>
   </div>
+  {% endif %}
 </article>

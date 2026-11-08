@@ -13,3 +13,11 @@ kramdown:
   math_engine: mathjax
 
 permalink: /posts/:title/
+
+# 블로그에 게시하지 않을 파이프라인 파일
+exclude:
+  - pipeline/
+  - build/
+  - requirements.txt
+  - README.md
+  - .github/

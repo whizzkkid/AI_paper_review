@@ -1,0 +1,74 @@
+# ① 핫한 논문 자동 선정 → Claude 리뷰 초안 + 쇼츠 미리보기 → "승인 요청" PR
+#    이 워크플로는 아무것도 배포하지 않습니다. PR을 머지해야(=승인) 배포됩니다.
+name: "1) 논문 리뷰 초안 생성 (승인 요청 PR)"
+
+on:
+  schedule:
+    - cron: "17 23 * * 0,3"   # 매주 월·목 08:17 KST (UTC 일·수 23:17)
+  workflow_dispatch:
+    inputs:
+      arxiv_id:
+        description: "리뷰할 arXiv ID (비우면 최근 핫한 학회 논문을 자동 선정)"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: generate-review
+  cancel-in-progress: false
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install system packages (ffmpeg, poppler)
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg poppler-utils
+
+      - name: Install Python packages
+        run: pip install -r requirements.txt
+
+      - name: Find papers that already have an open review branch
+        id: open
+        run: |
+          ids=$(git ls-remote --heads origin 'auto/review-*' | sed -E 's#.*refs/heads/auto/review-##; s#-.*##' | paste -sd, -)
+          echo "ids=$ids" >> "$GITHUB_OUTPUT"
+
+      - name: Discover → Claude review → render Shorts preview
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GOOGLE_TTS_API_KEY: ${{ secrets.GOOGLE_TTS_API_KEY }}
+          ARXIV_ID: ${{ inputs.arxiv_id }}
+          EXCLUDE: ${{ steps.open.outputs.ids }}
+        run: python -m pipeline.run --arxiv-id "$ARXIV_ID" --exclude "$EXCLUDE"
+
+      - name: Upload preview video
+        if: hashFiles('build/manifest.json') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: shorts-preview
+          path: build/**/*.mp4
+          retention-days: 14
+
+      - name: Open approval PR (notifies the repo owner)
+        if: hashFiles('build/manifest.json') != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          OWNER: ${{ github.repository_owner }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          python -m pipeline.open_pr build/manifest.json --assignee "$OWNER"

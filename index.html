@@ -28,7 +28,7 @@ title: "최신 AI 학회 논문 리뷰 & 60초 쇼츠 아카이브"
           <a href="{{ site.baseurl }}{{ post.url }}" style="color: #fff; text-decoration: none;">{{ post.title }}</a>
         </h2>
         <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 14px; line-height: 1.6;">
-          {{ post.content | strip_html | truncatewords: 35 }}
+          {% if post.description %}{{ post.description }}{% else %}{{ post.content | strip_html | truncatewords: 35 }}{% endif %}
         </p>
         <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; color: var(--text-muted);">
           <span>📅 {{ post.date | date: "%Y-%m-%d" }}</span>
