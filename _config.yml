@@ -21,3 +21,5 @@ exclude:
   - requirements.txt
   - README.md
   - .github/
+  - editorial/
+  - shorts/

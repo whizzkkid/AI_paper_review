@@ -17,13 +17,15 @@ description: KAIST·POSTECH 연구진의 LARC는 통합 멀티모달 모델이 �
 arxiv_id: '2610.42149'
 venue: NeurIPS 2026
 image: /assets/shorts/2026-11-08-latent-reasoning-in-continuous-space-for-unified-thumb.jpg
-shorts_spec: shorts/2026-11-08-latent-reasoning-in-continuous-space-for-unified.json
+shorts_spec: shorts/2026-11-08-latent-reasoning-in-continuous-space-for-unified.yml
 youtube_id: ''
+visibility: "unlisted"
+exemplar: true
 ---
 
 > **논문 원제**: *Latent Reasoning in Continuous Space for Unified Multimodal Models*  
 > **학회**: **NeurIPS 2026**  
-> **저자**: Byungwoo Jeon, Yoonwoo Jeong, Hyunseok Lee, Minsu Cho, Jinwoo Shin (KAIST AI)  
+> **저자**: Byungwoo Jeon, Yoonwoo Jeong, Hyunseok Lee, Minsu Cho, Jinwoo Shin (KAIST · POSTECH · RLWRLD)  
 > **원문 링크**: [arXiv:2610.42149](https://arxiv.org/abs/2610.42149) / [PDF](https://arxiv.org/pdf/2610.42149) / [Hugging Face](https://huggingface.co/papers/2610.42149) / [프로젝트 페이지](https://rootyjeon.github.io/larc-umm/)
 
 ---
@@ -67,6 +69,10 @@ flowchart TD
     F --> G["생성 이미지 x"]
     G -.->|"Stage 2 보상: 정보 이득 + 다양성"| C
 ```
+
+![LARC 전체 구조: Stage 1 커리큘럼 SFT와 Stage 2 자기진화 RL]({{ "/assets/papers/2610.42149/figure2.png" | relative_url }})
+
+<p class="fig-cap">그림: 논문 Figure 2 — LARC 전체 구조: Stage 1 커리큘럼 SFT와 Stage 2 자기진화 RL (출처: arXiv:2610.42149)</p>
 
 ### 3.1 텍스트와 잠재 추론을 번갈아 (Interleaved Latent Reasoning)
 
@@ -127,6 +133,16 @@ $$
 
 논문의 가장 큰 주장은 LARC가 **뚜렷한 test-time scaling을 보인 최초의 추론 강화형 UMM**이라는 것입니다. 잠재 추론 예산을 늘릴수록 이미지 생성·편집·시각적 추론 성능이 단조 증가하고, 같은 계산량의 best-of-N 샘플링보다 일관되게 좋았습니다(Figure 1).
 
+![잠재 추론 단계(빨강)를 늘릴수록 best-of-N(파랑)보다 꾸준히 좋아짐]({{ "/assets/papers/2610.42149/figure1.png" | relative_url }})
+
+<p class="fig-cap">그림: 논문 Figure 1 — 잠재 추론 단계(빨강)를 늘릴수록 best-of-N(파랑)보다 꾸준히 좋아짐 (출처: arXiv:2610.42149)</p>
+
+실제 생성 결과로 보면 차이가 더 분명합니다. "정면을 보는(looking front)" 호랑이를 요청했을 때, BAGEL은 여러 장을 뽑아도 조건을 놓쳤지만 LARC는 추론을 늘릴수록 조건을 맞췄습니다(논문 Figure 3).
+
+![같은 프롬프트에서 BAGEL + best-of-N(왼쪽)과 LARC(오른쪽) 비교]({{ "/assets/papers/2610.42149/figure3.png" | relative_url }})
+
+<p class="fig-cap">그림: 논문 Figure 3 — 같은 프롬프트에서 BAGEL + best-of-N(왼쪽)과 LARC(오른쪽) 비교 (출처: arXiv:2610.42149)</p>
+
 비용 측면의 비교가 특히 인상적입니다(A100 1장, 배치 1, 샘플당 시간).
 
 | 추론량 | BAGEL + Best-of-N | LARC (잠재 단계 L) |
@@ -158,7 +174,7 @@ Best-of-N은 이미지를 N번 통째로 다시 생성해야 하지만, LARC는 
 - 평가는 주로 **모델 기반 지표**(논문 표현으로 MLLM-as-a-Judge 포함)이며, 본문에서 사람 선호도 평가는 찾을 수 없었습니다. GenEval에서 GPT-4o를 넘었다는 결과도 같은 자동 평가 틀 안에서의 비교로 읽는 것이 안전합니다.
 - 정보 이득 보상은 **참조 모델 자신의 가능도**에 기대는 자기 보상입니다. 다양성 보상 없이 바로 붕괴했다는 결과(Table 12)는 이 보상이 지름길을 찾기 쉽다는 신호이기도 해서, 더 긴 RL이나 다른 데이터에서의 안정성이 궁금합니다.
 - 벡터로 생각하는 만큼 **추론 과정을 사람이 읽기 어려워집니다.** 텍스트 구간이 일부 남아 있긴 하지만, 왜 그 그림이 나왔는지 설명하기는 토큰 CoT보다 어렵습니다.
-- Test-time scaling 곡선은 Figure 1 그래프로만 제시되어, 예산별 정확한 수치는 본문 표로 확인할 수 없었습니다.
+- Test-time scaling 곡선은 Figure 1 그래프로만 제시되어, 예산별 정확한 수치는 본문 표로 확인할 수 없었습니다. 정성 비교(Figure 3·4)도 선별된 예시라는 점을 감안해야 합니다.
 
 ---
 

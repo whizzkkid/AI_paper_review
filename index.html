@@ -17,7 +17,8 @@ title: "최신 AI 학회 논문 리뷰 & 60초 쇼츠 아카이브"
   <h3 style="margin-bottom: 20px; color: var(--text-muted); font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.05em;">최신 논문 리뷰</h3>
 
   <div class="posts-list" style="display: flex; flex-direction: column; gap: 20px;">
-    {% for post in site.posts %}
+    {% assign public_posts = site.posts | where_exp: "p", "p.visibility != 'unlisted'" %}
+    {% for post in public_posts %}
       <div style="padding: 24px; background: var(--card-bg); border-radius: 10px; border: 1px solid var(--border); transition: border-color 0.2s;">
         <div style="margin-bottom: 8px;">
           {% for tag in post.tags limit:3 %}
@@ -36,5 +37,8 @@ title: "최신 AI 학회 논문 리뷰 & 60초 쇼츠 아카이브"
         </div>
       </div>
     {% endfor %}
+    {% if public_posts.size == 0 %}
+      <p style="color: var(--text-muted);">곧 첫 리뷰가 공개됩니다. 🚀</p>
+    {% endif %}
   </div>
 </section>

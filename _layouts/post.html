@@ -3,6 +3,9 @@ layout: default
 ---
 
 <article class="post">
+  {% if page.visibility == "unlisted" %}
+  <div class="unlisted-banner">🔒 비공개 미리보기 — 이 글은 블로그 목록과 검색엔진에 노출되지 않습니다. (front matter의 <code>visibility</code>를 <code>public</code>으로 바꾸면 공개)</div>
+  {% endif %}
   <div style="margin-bottom: 24px;">
     <a href="{{ site.baseurl }}/" style="font-size: 0.9rem; color: var(--text-muted);">← 목록으로 돌아가기</a>
   </div>

@@ -8,8 +8,10 @@ description: "ICLR 2026 Outstanding Paper. 15개 LLM, 20만 건 이상의 시뮬
 arxiv_id: "2505.06120"
 venue: "ICLR 2026"
 image: "/assets/shorts/2026-11-08-llms-get-lost-in-multi-turn-conversation-thumb.jpg"
-shorts_spec: "shorts/2026-11-08-llms-get-lost-in-multi-turn-conversation.json"
+shorts_spec: "shorts/2026-11-08-llms-get-lost-in-multi-turn-conversation.yml"
 youtube_id: ""
+visibility: "unlisted"
+exemplar: true
 ---
 
 > **논문 원제**: *LLMs Get Lost In Multi-Turn Conversation*  
@@ -42,6 +44,10 @@ Microsoft Research와 Salesforce Research 연구진은 GPT-4.1, Gemini 2.5 Pro, 
 1. **Full (단일 턴)**: 모든 조건을 한 번에 담은 완전한 지시.
 2. **Concat (단일 턴, 조각 나열)**: 지시를 잘게 쪼갠 조각(shard)들을 **한 턴에 모두** 나열.
 3. **Sharded (멀티 턴)**: 같은 조각들을 실제 대화처럼 **한 턴에 하나씩** 공개.
+
+![하나의 지시를 조각(shard)으로 나눠 대화 방식별로 시뮬레이션]({{ "/assets/papers/2505.06120/figure4.png" | relative_url }})
+
+<p class="fig-cap">그림: 논문 Figure 4 — 하나의 지시를 조각(shard)으로 나눠 대화 방식별로 시뮬레이션 (출처: arXiv:2505.06120)</p>
 
 ```mermaid
 flowchart TD
@@ -80,6 +86,10 @@ flowchart TD
 - 같은 지시에 대해 가장 잘된 실행과 가장 못된 실행의 차이가 **평균 50%p**에 달했습니다.
 
 즉, 멀티턴에서 모델이 갑자기 멍청해진다기보다 **어떤 때는 맞고 어떤 때는 크게 틀리는 '들쭉날쭉함'**이 폭증하는 것이 핵심입니다. 단일턴에선 똑똑한 모델일수록 안정적이었지만, 멀티턴에선 모든 모델의 불안정성이 비슷하게 높았습니다.
+
+![가운데 그래프: 단일턴(파랑)에서 멀티턴(노랑)으로 가면 모델들이 오른쪽 아래(불안정성↑)로 이동]({{ "/assets/papers/2505.06120/figure1.png" | relative_url }})
+
+<p class="fig-cap">그림: 논문 Figure 1 — 가운데 그래프: 단일턴(파랑)에서 멀티턴(노랑)으로 가면 모델들이 오른쪽 아래(불안정성↑)로 이동 (출처: arXiv:2505.06120)</p>
 
 ---
 
