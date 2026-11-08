@@ -37,9 +37,11 @@
 `chat`(LLM 현상 재현) · `bars`/`line`/`stat`(애니메이션 차트) · `flow`(다이어그램, 순환 루프) · `split`(기존 vs 제안)
 · `figure`(논문 실제 그림 + 줌인·하이라이트) · `paper`(논문 카드 + 학회 도장) · `tokens`(개념 비유) · `steps` · `cta`
 
-**소리**: 효과음(말풍선 팝, 장면 전환, 도장, 정답 딩, 숫자 상승음)과 잔잔한 배경음악을 **코드로 직접 합성**해 넣습니다.
-효과음은 각 애니메이션의 타이밍에서 계산되어 화면과 정확히 맞고, 배경음악은 말할 때 자동으로 작아집니다(덕킹).
-샘플·계정·저작권 걱정이 없고, 최종 음량은 YouTube 기준(-14 LUFS)에 맞춥니다. (`config.yml`의 `video.music`, `video.sfx`)
+**소리**: 효과음은 [SoundWeaver](pipeline/video/sfx/soundweaver/LICENSE)(MIT) 플러그인의 WAV를 라벨에 맞춰 골라 씁니다.
+보낸 말풍선, 받은 말풍선, 장면 전환, 정답 차임, 오답처럼 이벤트마다 소리가 다릅니다.
+도장·숫자 상승음·배경음악은 코드로 직접 합성합니다. 효과음은 각 애니메이션의 타이밍에서 계산되어 화면과 정확히 맞고,
+배경음악은 말할 때 자동으로 작아집니다(덕킹). 계정·저작권 걱정이 없고, 최종 음량은 YouTube 기준(-14 LUFS)에 맞춥니다.
+(`config.yml`의 `video.music`, `video.sfx`, `video.sfx_pack: soundweaver | synth`)
 
 **논문 그림**: arXiv HTML 버전에서 가져오고, HTML이 없으면 PDF에서 "Figure N:" 캡션 위 영역을 잘라냅니다(pdfplumber).
 

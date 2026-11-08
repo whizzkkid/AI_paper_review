@@ -670,7 +670,7 @@ const EV = {
     const out = [];
     msgs.forEach((m, i) => {
       const t0 = .3 + i * step;
-      out.push({ t: t0, kind: m.role === 'user' ? 'pop' : 'pop2' });
+      out.push({ t: t0, kind: m.role === 'user' ? 'msg_out' : 'msg_in' });
       if (m.mark) out.push({ t: t0 + .4, kind: { wrong: 'error', ok: 'ding', lost: 'blip' }[m.mark] });
     });
     if (v.dim_middle && msgs.length >= 4) out.push({ t: .3 + n * step + .2, kind: 'swell' });

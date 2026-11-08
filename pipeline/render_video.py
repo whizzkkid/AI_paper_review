@@ -229,7 +229,7 @@ def mix_plan(work: Path, voice_wav: Path, total: float, events: list[dict], vcfg
     else:
         chains.append("[1:a]loudnorm=I=-16:TP=-2:LRA=11,aresample=48000[v]")
     if vcfg.get("sfx", True) and events:
-        inputs += ["-i", str(write_wav(work / "sfx.wav", sfx_track(events, total)))]
+        inputs += ["-i", str(write_wav(work / "sfx.wav", sfx_track(events, total, str(vcfg.get("sfx_pack", "soundweaver")))))]
         chains.append(f"[{idx}:a]aresample=48000[s]")
         mix.append("[s]")
     tail = "alimiter=limit=0.9:level=false,loudnorm=I=-14:TP=-1.5:LRA=11,aresample=48000[a]"

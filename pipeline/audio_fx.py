@@ -1,8 +1,13 @@
-"""Royalty-free sound design, synthesized from scratch with numpy (no samples, no accounts).
+"""Royalty-free sound design (no accounts, no paid services).
 
-  sfx_track(events, total)  one-shot effects placed on the exact frames the stage animates
-                            (bubble pops, transitions, stamp thud, verdict ding, count-up riser …)
-  music_bed(total)          a soft pad + arpeggio bed; render_video ducks it under the narration
+  sfx_track(events, total, pack)  one-shot effects placed on the exact frames the stage animates
+                                  (bubble pops, transitions, stamp thud, verdict ding, count-up riser …)
+  music_bed(total)                a soft pad + arpeggio bed; render_video ducks it under the narration
+
+Two effect packs (config.yml → video.sfx_pack):
+  "soundweaver"  pre-rendered WAVs from the SoundWeaver plugin (MIT, pipeline/video/sfx/soundweaver/),
+                 picked by their labels; kinds without a match fall back to the synth below
+  "synth"        everything synthesized here with numpy
 Everything is mono, 48 kHz float32 in [-1, 1].
 """
 
@@ -129,10 +134,64 @@ KINDS = {
     "riser": (lambda d: riser(min(d or 1.3, 1.8)), 0.06),
     "shimmer": (lambda d: shimmer(), 0.08),
     "click": (lambda d: click(), 0.25),
+    "msg_out": (lambda d: pop(), 0.22),
+    "msg_in": (lambda d: pop(760, 430), 0.2),
+}
+
+# kind → (SoundWeaver file, gain). Picked from the plugin's labels (bestContexts / feeling);
+# gains match each file's 30 ms peak loudness to the synth sound it replaces.
+PACK_DIR = Path(__file__).resolve().parent / "video" / "sfx" / "soundweaver"
+SOUNDWEAVER = {
+    "msg_out": ("message-sent-swish", 0.20),        # "'Off it goes'" — the user's bubble
+    "msg_in": ("message-incoming-pop", 0.11),       # "A chat message landed" — the model's reply
+    "pop": ("popover-pop", 0.13),                   # "A small overlay appears" — node / card / highlight
+    "blip": ("select-item", 0.12),                  # "Precise 'picked'" — step items
+    "tick": ("type-key", 0.16),                     # "Tiny key-tick" — token words typing in
+    "rise": ("modal-open-rise", 0.063),             # "Something rising into focus" — bar grows
+    "ding": ("success-warm-chime", 0.15),           # "Rewarding 'you did it'" — highlight / verdict
+    "error": ("error-soft-thud", 0.17),             # "Gentle 'that didn't work'" — wrong answer
+    "whoosh": ("transition-smooth-whoosh", 0.11),   # "Motion and continuity" — scene change
+    "whoosh_s": ("whoosh-short", 0.10),             # "Quick motion accent"
+    "zoom": ("transition-glide", 0.11),             # "Smooth guided movement" — zoom into a figure
+    "swell": ("modal-close-fall", 0.057),           # "Dismissed and receding" — middle turns fade out
+    "click": ("click-crisp-primary", 0.11),         # "primary CTA" — subscribe tap
 }
 
 
-def sfx_track(events: list[dict], total: float) -> np.ndarray:
+def _resample(x: np.ndarray, sr_from: int, sr_to: int) -> np.ndarray:
+    if sr_from == sr_to:
+        return x
+    n_out = int(round(len(x) * sr_to / sr_from))
+    spec = np.fft.rfft(x)
+    out = np.zeros(n_out // 2 + 1, dtype=complex)
+    k = min(len(spec), len(out))
+    out[:k] = spec[:k]
+    return np.fft.irfft(out, n_out) * (n_out / len(x))
+
+
+def read_wav(path: Path) -> np.ndarray:
+    with wave.open(str(path), "rb") as w:
+        if w.getsampwidth() != 2:
+            raise ValueError(f"{path.name}: only 16-bit PCM is supported")
+        x = np.frombuffer(w.readframes(w.getnframes()), "<i2").astype(np.float64) / 32768
+        if w.getnchannels() > 1:
+            x = x.reshape(-1, w.getnchannels()).mean(axis=1)
+        return _resample(x, w.getframerate(), SR)
+
+
+def _sound(kind: str, dur: float, pack: str) -> np.ndarray:
+    if pack == "soundweaver" and kind in SOUNDWEAVER:
+        name, gain = SOUNDWEAVER[kind]
+        f = PACK_DIR / f"{name}.wav"
+        if f.exists():
+            x = read_wav(f)
+            return gain * x / (np.abs(x).max() + 1e-9)
+    gen, gain = KINDS[kind]
+    x = gen(dur)
+    return gain * x / (np.abs(x).max() + 1e-9)
+
+
+def sfx_track(events: list[dict], total: float, pack: str = "soundweaver") -> np.ndarray:
     out = np.zeros(int(total * SR) + SR)
     cache: dict[tuple, np.ndarray] = {}
     for ev in events:
@@ -141,9 +200,7 @@ def sfx_track(events: list[dict], total: float) -> np.ndarray:
             continue
         key = (kind, round(dur, 2))
         if key not in cache:
-            gen, gain = KINDS[kind]
-            x = gen(dur)
-            cache[key] = gain * x / (np.abs(x).max() + 1e-9)
+            cache[key] = _sound(kind, dur, pack)
         x = cache[key]
         i = int(at * SR)
         out[i:i + len(x)] += x[: len(out) - i]
