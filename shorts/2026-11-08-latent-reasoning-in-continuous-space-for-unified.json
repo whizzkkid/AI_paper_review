@@ -1,0 +1,222 @@
+{
+  "version": 1,
+  "stem": "2026-11-08-latent-reasoning-in-continuous-space-for-unified",
+  "slug": "latent-reasoning-in-continuous-space-for-unified",
+  "post": "_posts/2026-11-08-latent-reasoning-in-continuous-space-for-unified.md",
+  "blog_url": "https://whizzkkid.github.io/AI_paper_review/posts/latent-reasoning-in-continuous-space-for-unified/",
+  "paper": {
+    "arxiv_id": "2610.42149",
+    "title": "Latent Reasoning in Continuous Space for Unified Multimodal Models",
+    "authors": [
+      "Byungwoo Jeon",
+      "Yoonwoo Jeong",
+      "Hyunseok Lee",
+      "Minsu Cho",
+      "Jinwoo Shin"
+    ],
+    "published": "2026-10-30",
+    "organization": "KAIST AI",
+    "venue": {
+      "venue": "NeurIPS 2026",
+      "track": "main",
+      "honor": "",
+      "raw": "Published as conference proceeding for NeurIPS 2026. Last two authors advised equally"
+    },
+    "upvotes": 44,
+    "abs_url": "https://arxiv.org/abs/2610.42149",
+    "pdf_url": "https://arxiv.org/pdf/2610.42149",
+    "hf_url": "https://huggingface.co/papers/2610.42149",
+    "project_page": "https://rootyjeon.github.io/larc-umm/"
+  },
+  "shorts": {
+    "title": "그림 AI에게 단어 대신 벡터로 생각하게 했더니 생긴 일",
+    "title_candidates": [
+      "그림 AI는 왜 생각을 더 해도 안 좋아질까? KAIST의 답",
+      "NeurIPS 2026 KAIST 논문, 이미지 AI의 생각법을 바꾸다",
+      "10번 생각하는 데 48초, 새로운 이미지 AI 추론법"
+    ],
+    "description": "그림 AI에게 '생각할 시간'을 더 줘도 그림이 좋아지지 않던 이유는 무엇일까요?\nKAIST·POSTECH 연구진의 NeurIPS 2026 논문 LARC는 추론을 단어 토큰이 아닌 연속 벡터 공간에서 하도록 바꿔, 베이스 모델 BAGEL 대비 GenEval 0.81 → 0.88을 달성했습니다.\n잠재 추론 10단계에 48초로, 10장을 뽑아 고르는 방식(469초)보다 훨씬 효율적인 test-time scaling도 보여줍니다.",
+    "tags": [
+      "NeurIPS 2026",
+      "KAIST",
+      "POSTECH",
+      "LARC",
+      "멀티모달",
+      "이미지 생성",
+      "AI 논문",
+      "논문 리뷰",
+      "test-time scaling",
+      "잠재 추론",
+      "강화학습",
+      "인공지능",
+      "딥러닝"
+    ],
+    "scenes": [
+      {
+        "layout": "hook",
+        "headline": "생각을 더 해도\n그림은 **그대로?**",
+        "subtext": "이미지 AI의 오래된 숙제",
+        "bullets": [],
+        "stat_value": "",
+        "stat_label": "",
+        "left_label": "",
+        "left_value": "",
+        "right_label": "",
+        "right_value": "",
+        "narration": "그림 AI는 왜 생각을 더 시켜도 그림이 좋아지지 않을까요?",
+        "broll_note": "추론 토큰이 쌓이는데 결과 이미지는 그대로인 대비 화면"
+      },
+      {
+        "layout": "paper",
+        "headline": "KAIST·POSTECH의\n**NeurIPS 2026** 논문",
+        "subtext": "LARC: 연속 공간에서의 잠재 추론",
+        "bullets": [],
+        "stat_value": "",
+        "stat_label": "",
+        "left_label": "",
+        "left_value": "",
+        "right_label": "",
+        "right_value": "",
+        "narration": "카이스트와 포스텍의 뉴립스 2026 논문, 라크가 답을 내놨습니다.",
+        "broll_note": "논문 첫 페이지 클로즈업"
+      },
+      {
+        "layout": "bullets",
+        "headline": "문제는 **언어 불일치**",
+        "subtext": "",
+        "bullets": [
+          "추론은 끊어진 단어 토큰으로",
+          "이미지는 연속 벡터 공간에서",
+          "단어로는 공간 정보가 샌다"
+        ],
+        "stat_value": "",
+        "stat_label": "",
+        "left_label": "",
+        "left_value": "",
+        "right_label": "",
+        "right_value": "",
+        "narration": "생각은 끊어진 단어로 하는데, 그림은 연속적인 벡터 공간에서 그려지거든요.",
+        "broll_note": "블록 같은 토큰과 매끄러운 그라데이션 공간을 나란히 보여주기"
+      },
+      {
+        "layout": "bullets",
+        "headline": "해법: **벡터로** 생각하기",
+        "subtext": "",
+        "bullets": [
+          "은닉 상태를 그대로 다음 입력에",
+          "1단계 커리큘럼 SFT",
+          "2단계 정보이득 보상 RL"
+        ],
+        "stat_value": "",
+        "stat_label": "",
+        "left_label": "",
+        "left_value": "",
+        "right_label": "",
+        "right_value": "",
+        "narration": "라크는 내부 벡터로 생각을 잇고, 그 생각이 그림을 얼마나 도왔는지로 스스로 학습합니다.",
+        "broll_note": "은닉 상태가 다음 입력으로 되먹임되는 루프 애니메이션"
+      },
+      {
+        "layout": "compare",
+        "headline": "GenEval 종합 점수",
+        "subtext": "참고: GPT-4o 0.84 · 논문 Table 1",
+        "bullets": [],
+        "stat_value": "",
+        "stat_label": "",
+        "left_label": "BAGEL (기존)",
+        "left_value": "0.81",
+        "right_label": "LARC",
+        "right_value": "0.88",
+        "narration": "그 결과 베이글의 0.81을 0.88까지 끌어올려, GPT-4o 점수도 넘었습니다.",
+        "broll_note": "두 막대가 차오르는 비교 그래프"
+      },
+      {
+        "layout": "stat",
+        "headline": "10단계 생각에 걸린 시간",
+        "subtext": "A100 1장, 샘플당 · 논문 Table 11",
+        "bullets": [],
+        "stat_value": "48초",
+        "stat_label": "10장 뽑아 고르기는 469초",
+        "left_label": "",
+        "left_value": "",
+        "right_label": "",
+        "right_value": "",
+        "narration": "생각을 열 단계로 늘려도 48초, 열 장을 뽑아 고르는 방식은 469초였죠.",
+        "broll_note": "스톱워치 두 개가 나란히 도는 연출"
+      },
+      {
+        "layout": "cta",
+        "headline": "생각의 언어를\n**바꾸면** 된다",
+        "subtext": "",
+        "bullets": [],
+        "stat_value": "",
+        "stat_label": "",
+        "left_label": "",
+        "left_value": "",
+        "right_label": "",
+        "right_value": "",
+        "narration": "자세한 표와 한계 분석은 설명란 블로그에서, 다음 논문은 구독으로 받아보세요.",
+        "broll_note": "블로그 화면 스크롤 + 구독 버튼"
+      }
+    ]
+  },
+  "facts": [
+    {
+      "claim": "기존 UMM은 추론 예산을 늘려도 성능이 매끄럽게 오르지 않는다",
+      "evidence_quote": "prior UMMs fail to scale at test time: unlike in LLMs, increasing the reasoning budget does not yield the smooth performance gains observed on LLM benchmarks",
+      "location": "Section 1, Figure 1"
+    },
+    {
+      "claim": "원인은 이산 토큰 추론과 연속 공간 이미지 생성의 모달리티 불일치",
+      "evidence_quote": "reasoning is performed in a discrete token space, whereas image generation operates in a continuous latent space",
+      "location": "Abstract, Section 1"
+    },
+    {
+      "claim": "GenEval 종합 BAGEL 0.81 → LARC 0.88 (GPT-4o 0.84)",
+      "evidence_quote": "LARC achieves state-of-the-art performance on GenEval with a 7%p gain over BAGEL",
+      "location": "Abstract, Table 1"
+    },
+    {
+      "claim": "속성 결합 0.63 → 0.78 (+15%p)",
+      "evidence_quote": "The improvement is most pronounced on Attribute Binding, with a +15%p increase over the baseline.",
+      "location": "Section 3.1, Table 1"
+    },
+    {
+      "claim": "DPG-Bench 85.07 → 90.04, OneIG-Bench +10.2%p",
+      "evidence_quote": "On DPG-Bench, the overall score of LARC improves by +5.8% (85.07 → 90.04) over the base model BAGEL. On OneIG-Bench, LARC yields a +10.2%p gain",
+      "location": "Section 3.1, Table 2-3"
+    },
+    {
+      "claim": "MIRA 7.5 → 11.7",
+      "evidence_quote": "The most pronounced gain appears on MIRA (7.5 → 11.7)",
+      "location": "Section 3.2, Table 5"
+    },
+    {
+      "claim": "토큰 수준 추론은 MIRA를 7.5 → 7.1로 낮춤",
+      "evidence_quote": "Notably, token-level reasoning slightly degrades visual reasoning performance compared to the baseline",
+      "location": "Section 3.4, Table 6"
+    },
+    {
+      "claim": "Best-of-10 469.0초 vs LARC L=10 48.0초, L=1 대비 1.2초 추가",
+      "evidence_quote": "LARC incurs only a marginal overhead as the number of latent steps increases, requiring additional 1.2 seconds at L = 10 compared to L = 1.",
+      "location": "Appendix D.1, Table 11"
+    },
+    {
+      "claim": "1M interleaved 샘플, A100 8장, Stage 1 약 300 / Stage 2 96 GPU시간",
+      "evidence_quote": "All training experiments are conducted with 8× NVIDIA A100s, taking approximately 300 GPU hours in Stage 1 and 96 GPU hours in Stage 2.",
+      "location": "Appendix A"
+    },
+    {
+      "claim": "다양성 보상 없으면 코사인 유사도 0.97로 붕괴, MIRA 11.7 → 9.8",
+      "evidence_quote": "removing the diversity reward (λdiv =0) leads to a pairwise cosine similarity of 0.97 across latent steps",
+      "location": "Appendix D.2, Table 12"
+    }
+  ],
+  "youtube": {
+    "skip": false,
+    "video_id": "",
+    "url": "",
+    "uploaded_at": ""
+  },
+  "generated_at": "2026-11-08T20:08:02+09:00"
+}
