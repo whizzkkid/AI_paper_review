@@ -36,7 +36,7 @@ from .paper import download_pdf, fetch_paper, pdf_text
 
 ICONS = sorted(json.loads((ROOT / "pipeline" / "video" / "icons.js").read_text(encoding="utf-8")
                           .split("window.ICONS = ", 1)[1].rstrip().rstrip(";")).keys())
-VISUAL_TYPES = ["chat", "bars", "line", "flow", "split", "stat", "steps", "figure", "paper", "tokens", "cta", "title"]
+VISUAL_TYPES = ["chat", "bars", "line", "flow", "split", "stat", "steps", "figure", "paper", "tokens", "broll", "cta", "title"]
 
 _S = {"type": "string"}
 _N = {"type": "number"}
@@ -79,6 +79,7 @@ VISUAL_SCHEMA = {"anyOf": [
     _obj({"type": _t("paper"), "stamp": _S, "orgs": _arr(_S)}),
     _obj({"type": _t("tokens"), "mode": {"type": "string", "enum": ["discrete", "continuous", "both"]},
           "words": _arr(_S), "top_label": _S, "bottom_label": _S}),
+    _obj({"type": _t("broll"), "prompt": _S, "caption": _S}),
     _obj({"type": _t("cta"), "blog_title": _S, "button": _S}),
     _obj({"type": _t("title"), "icon": _ICON, "subtext": _S}),
 ]}
@@ -161,9 +162,20 @@ def exemplars(limit: int = 2) -> list[dict[str, str]]:
     return out
 
 
+BROLL_ON = """
+## AI 생성 영상(broll) — 사용 가능
+- broll: Higgsfield로 생성하는 세로 {duration}초 분위기 영상이 장면 전체 배경으로 깔리고 headline이 위에 얹힙니다. 쇼츠당 최대 {max}장면.
+- 개념을 '비유'하는 장면(주로 훅 또는 핵심 아이디어)에만 씁니다. 논문의 실제 결과·그래프·생성 이미지, 실존 인물, 로고, 화면 속 글자를 묘사하지 않습니다.
+- prompt는 영어 한 문단: 피사체, 동작, 배경, 조명·색감(어두운 남색 톤과 어울리게), 카메라 움직임(slow dolly-in 등). caption은 "AI 생성 영상 · 비유" 형태.
+"""
+BROLL_OFF = "\n## AI 생성 영상(broll)은 현재 꺼져 있으니 visual.type=broll을 쓰지 마세요.\n"
+
+
 def system_prompt() -> str:
     guide = style_guide()
-    return BASE_PROMPT + (f"\n# 편집장 스타일 가이드 (editorial/style-guide.md — 사실성 원칙 다음으로 우선)\n{guide}\n" if guide else "")
+    b = load_config().get("broll", {})
+    broll = BROLL_ON.format(duration=b.get("duration", 6), max=b.get("max_per_short", 2)) if b.get("enabled") else BROLL_OFF
+    return BASE_PROMPT + broll + (f"\n# 편집장 스타일 가이드 (editorial/style-guide.md — 사실성 원칙 다음으로 우선)\n{guide}\n" if guide else "")
 
 
 def _paper_brief(paper: dict[str, Any], figures: list[dict[str, Any]]) -> str:
@@ -286,6 +298,8 @@ def _clamp_box(b: dict[str, Any] | None, full: bool) -> dict[str, float]:
 def normalize_content(c: dict[str, Any], figures: list[dict[str, Any]] | None = None) -> tuple[dict[str, Any], list[str]]:
     warnings: list[str] = []
     fig_ids = {f["id"] for f in (figures or [])}
+    bcfg = load_config().get("broll", {})
+    broll_left = int(bcfg.get("max_per_short", 2)) if bcfg.get("enabled") else 0
     scenes = c["scenes"]
     for i, s in enumerate(scenes):
         s["headline"] = _EMOJI_RE.sub("", s.get("headline", "")).replace("\\n", "\n").strip()
@@ -302,6 +316,12 @@ def normalize_content(c: dict[str, Any], figures: list[dict[str, Any]] | None = 
                 v["crop"] = _clamp_box(v.get("crop"), full=True)
                 v["focus"] = _clamp_box(v.get("focus"), full=False)
                 v["highlights"] = [dict(_clamp_box(h, full=False), label=h.get("label", "")) for h in v.get("highlights", [])][:2]
+        if v["type"] == "broll":
+            if broll_left <= 0 or not str(v.get("prompt", "")).strip():
+                warnings.append(f"장면 {i + 1}: broll 사용 불가(꺼짐·개수 초과·prompt 없음) → title로 대체")
+                v = {"type": "title", "icon": "film", "subtext": v.get("caption", "")}
+            else:
+                broll_left -= 1
         s["visual"] = v
     types = [s["visual"]["type"] for s in scenes]
     if not (5 <= len(scenes) <= 9):

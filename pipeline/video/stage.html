@@ -161,6 +161,13 @@ svg text { font-family: P, sans-serif; }
 .cursor { position: absolute; width: 80px; height: 80px; }
 .ripple { position: absolute; border-radius: 50%; border: 6px solid rgba(255,255,255,.8); }
 
+/* broll (AI-generated clip, full-bleed) */
+.broll { position: absolute; inset: 0; overflow: hidden; background: #000; }
+.broll img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform-origin: 50% 45%; }
+.bshade { position: absolute; inset: 0; background: linear-gradient(rgba(0,0,0,.62) 0%, rgba(0,0,0,.18) 32%, rgba(0,0,0,.08) 55%, rgba(0,0,0,.7) 88%); }
+.btag { position: absolute; right: 44px; top: 1192px; padding: 8px 18px; border-radius: 18px; background: rgba(0,0,0,.55);
+  display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 26px; color: #e6edf3; }
+
 /* title */
 .halo { position: absolute; left: 50%; border-radius: 50%; background: radial-gradient(circle, rgba(88,166,255,.35), rgba(88,166,255,0) 65%); }
 .bigico { position: absolute; left: 50%; border-radius: 50%; display: flex; align-items: center; justify-content: center;
@@ -364,18 +371,18 @@ V.line = (v, box) => {
   svg += `<text x="${L + PW / 2}" y="${T + PH + 96}" text-anchor="middle" font-size="30" font-weight="700" fill="#cfd6df">${esc(v.x_label || '')}</text>`;
   svg += `<text x="${L - 100}" y="${T - 34}" font-size="30" font-weight="700" fill="#cfd6df">${esc(v.y_label || '')}</text>`;
   series.forEach((s, i) => {
-    const c = s.highlight ? '#ffd640' : ['#58a6ff', '#a371f7', '#3fb950'][i % 3];
+    const c = s.highlight ? '#ffd640' : ['#3987e5', '#d95926', '#199e70'][i % 3];
     const d = s.points.map((p, k) => `${k ? 'L' : 'M'}${sx(+p.x)},${sy(+p.y)}`).join(' ');
     svg += `<path class="ln" data-i="${i}" d="${d}" fill="none" stroke="${c}" stroke-width="${s.highlight ? 10 : 7}" stroke-linecap="round" stroke-linejoin="round" ${s.highlight ? 'style="filter:drop-shadow(0 0 12px rgba(255,214,64,.6))"' : ''}/>`;
     s.points.forEach((p, k) => svg += `<circle class="pt" data-i="${i}" data-k="${k}" cx="${sx(+p.x)}" cy="${sy(+p.y)}" r="${s.highlight ? 11 : 9}" fill="${c}" opacity="0"/>`);
   });
   // legend
-  let lx = L; series.forEach((s, i) => { const c = s.highlight ? '#ffd640' : ['#58a6ff', '#a371f7', '#3fb950'][i % 3];
+  let lx = L; series.forEach((s, i) => { const c = s.highlight ? '#ffd640' : ['#3987e5', '#d95926', '#199e70'][i % 3];
     svg += `<rect x="${lx}" y="${18}" width="34" height="12" rx="6" fill="${c}"/><text x="${lx + 46}" y="${32}" font-size="30" font-weight="700" fill="#e6edf3">${esc(s.name)}</text>`; lx += 70 + s.name.length * 26; });
   svg += '</svg>';
   const el = $(`<div style="position:absolute;inset:0">${svg}${v.note ? `<div class="note" style="bottom:0">${esc(v.note)}</div>` : ''}</div>`);
   const labels = series.map((s, i) => { const last = s.points[s.points.length - 1];
-    const c = s.highlight ? 'var(--hi)' : ['#58a6ff', '#a371f7', '#3fb950'][i % 3];
+    const c = s.highlight ? 'var(--hi)' : ['#3987e5', '#d95926', '#199e70'][i % 3];
     const lab = $(`<div style="position:absolute;left:${sx(+last.x) + 22}px;top:${sy(+last.y) - 30}px;font-weight:900;font-size:${s.highlight ? 46 : 38}px;color:${c};white-space:nowrap">${esc(String(s.end_label ?? (last.y + unit)))}</div>`);
     el.appendChild(lab); return lab; });
   // keep end labels apart
@@ -659,6 +666,20 @@ V.cta = (v, box, ctx) => {
     } };
 };
 
+V.broll = (v, box, ctx) => {
+  const clip = (ctx.broll || {})[v.key];
+  if (!clip) return V.title({ icon: 'film', subtext: v.caption || '' }, box);
+  const el = $(`<div class="broll"><img alt=""><div class="bshade"></div><div class="btag">${icon('sparkles', 26, '#e6edf3')}<span>${esc(v.caption || 'AI 생성 영상')}</span></div></div>`);
+  const img = el.querySelector('img');
+  let last = -1;
+  return { el, update(lt, dur) {
+    const i = Math.max(0, Math.min(clip.count - 1, Math.floor(lt * clip.fps)));
+    img.style.transform = `scale(${1 + .08 * clamp(lt / Math.max(dur, 1))})`;
+    if (i !== last) { last = i; img.src = clip.dir + String(i + 1).padStart(4, '0') + '.jpg'; return img.decode().catch(() => {}); }
+  } };
+};
+V.broll.fullBleed = true;
+
 /* ───────────────────────── runtime ───────────────────────── */
 let D = null; const built = {};
 const blobs = [];
@@ -672,7 +693,8 @@ window.setup = async (data) => {
     bl.appendChild(b); blobs.push(b); });
   const ch = document.getElementById('chrome');
   ch.innerHTML = `<div class="brand"><i></i>${esc(D.channel)}</div>${D.badge ? `<div class="badge${D.badge_soft ? ' soft' : ''}">${esc(D.badge)}</div>` : ''}<div class="ref">${esc(D.ref)}</div>`;
-  const imgs = [...Object.values(D.figures || {}).map(f => f.src), D.paper && D.paper.page1].filter(Boolean);
+  const imgs = [...Object.values(D.figures || {}).map(f => f.src), D.paper && D.paper.page1,
+    ...Object.values(D.broll || {}).map(c => c.dir + '0001.jpg')].filter(Boolean);
   await Promise.all(imgs.map(src => new Promise(res => { const im = new Image(); im.onload = im.onerror = () => res(); im.src = src; })));
   await document.fonts.ready;
   await Promise.all(['500', '600', '700', '800', '900'].map(w => document.fonts.load(`${w} 40px P`)));
@@ -687,12 +709,18 @@ function build(k) {
   let head = null, top = 300;
   if (sc.headline) { head = $(`<div class="headline">${rich(sc.headline)}</div>`); el.appendChild(head);
     fitFont(head, 968, 210, 50); top = 236 + head.offsetHeight + 46; }
-  const box = { w: 960, h: 1240 - top };
-  const vis = $(`<div class="visual" style="top:${top}px;height:${box.h}px"></div>`);
-  el.appendChild(vis);
   const fn = V[(sc.visual || {}).type] || V.title;
-  const inst = fn(sc.visual || {}, box, D);
-  vis.appendChild(inst.el);
+  let inst;
+  if (fn.fullBleed && (D.broll || {})[(sc.visual || {}).key]) {
+    inst = fn(sc.visual || {}, { w: W, h: H }, D);
+    el.insertBefore(inst.el, el.firstChild);
+  } else {
+    const box = { w: 960, h: 1240 - top };
+    const vis = $(`<div class="visual" style="top:${top}px;height:${box.h}px"></div>`);
+    el.appendChild(vis);
+    inst = fn(sc.visual || {}, box, D);
+    vis.appendChild(inst.el);
+  }
   if (inst.init) inst.init();
   return (built[k] = { el, head, inst, sc });
 }
@@ -704,8 +732,9 @@ function renderScene(k, lt, alpha) {
   if (b.head) [...b.head.querySelectorAll('.w')].forEach((w, i) => { const p = prog(lt, .04 + i * .07, .35);
     w.style.opacity = eo(p); w.style.transform = `translateY(${(1 - eo(p)) * 40}px)`; });
   const e = eo(prog(lt, 0, .35));
-  b.el.querySelector('.visual').style.transform = `translateY(${(1 - e) * 40}px)`;
-  b.inst.update(lt, dur);
+  const vis = b.el.querySelector('.visual');
+  if (vis) vis.style.transform = `translateY(${(1 - e) * 40}px)`;
+  return b.inst.update(lt, dur);
 }
 
 let capIdx = -1;
@@ -724,7 +753,8 @@ function renderCaptions(t, show) {
     const p = prog(t, c.start, .12); box.firstElementChild.style.transform = `scale(${.94 + .06 * eo(p)})`; }
 }
 
-window.renderAt = (t, opts = {}) => {
+window.renderAt = async (t, opts = {}) => {
+  const waits = [];
   const ox = Math.sin(2 * Math.PI * t / 14) * 50, oy = Math.cos(2 * Math.PI * t / 17) * 50;
   document.getElementById('bg').style.transform = `translate(${ox * .4}px,${oy * .4}px)`;
   document.getElementById('grid').style.transform = `translate(${ox}px,${oy}px)`;
@@ -733,10 +763,11 @@ window.renderAt = (t, opts = {}) => {
   let k = D.scenes.findIndex(s => t >= s.start && t < s.end); if (k < 0) k = D.scenes.length - 1;
   Object.entries(built).forEach(([kk, b]) => { if (+kk !== k && +kk !== k - 1) b.el.style.display = 'none'; });
   const lt = t - D.scenes[k].start;
-  if (k > 0 && lt < .28) { renderScene(k - 1, t - D.scenes[k - 1].start, 1 - eo(lt / .28)); }
+  if (k > 0 && lt < .28) { waits.push(renderScene(k - 1, t - D.scenes[k - 1].start, 1 - eo(lt / .28))); }
   else if (built[k - 1]) built[k - 1].el.style.display = 'none';
-  renderScene(k, lt, eo(prog(lt, 0, .28)));
+  waits.push(renderScene(k, lt, eo(prog(lt, 0, .28))));
   renderCaptions(t, opts.captions !== false);
+  await Promise.all(waits);
   return true;
 };
 </script>

@@ -6,3 +6,4 @@ google-api-python-client>=2.100
 google-auth>=2.20
 google-auth-oauthlib>=1.2
 playwright>=1.50
+higgsfield-client>=0.2,<0.3

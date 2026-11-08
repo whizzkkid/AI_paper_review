@@ -180,6 +180,24 @@ def stage_data(spec: dict[str, Any], scenes, starts, ends, captions, total, cfg)
                 page.update(page1=_uri(top_path), page1_w=top.width, page1_h=top.height)
         except Exception as e:
             print(f"[warn] 논문 첫 페이지 렌더 실패: {e}", file=sys.stderr)
+    from .broll import extract_frames
+
+    fps = cfg["video"]["fps"]
+    broll: dict[str, Any] = {}
+    vis_out = []
+    for i, s in enumerate(scenes):
+        v = dict(s.get("visual") or {})
+        if v.get("type") == "broll":
+            f = ROOT / v["file"] if v.get("file") else None
+            if f and f.exists():
+                d = BUILD_DIR / spec["stem"] / "broll" / f"{i:02d}"
+                broll[str(i)] = {"dir": d.resolve().as_uri() + "/", "count": extract_frames(f, d, fps), "fps": fps}
+                v["key"] = str(i)
+            else:
+                print(f"[render] 장면 {i + 1}: broll 영상 파일이 없어 대체 화면으로 렌더링합니다 "
+                      "(python -m pipeline.broll 또는 Higgsfield MCP로 생성 후 file: 지정)", file=sys.stderr)
+                v = {"type": "title", "icon": "film", "subtext": v.get("caption", "")}
+        vis_out.append(v)
     badge = page["venue"] or "HOT PAPER"
     ref = f"arXiv {paper['arxiv_id']}" + (f"  ·  {paper['organization']}" if paper.get("organization") else "")
     blog = spec["blog_url"].replace("https://", "").rstrip("/")
@@ -192,7 +210,8 @@ def stage_data(spec: dict[str, Any], scenes, starts, ends, captions, total, cfg)
         "blog_title": spec.get("blog_title") or spec["shorts"]["title"],
         "paper": page,
         "figures": figures,
-        "scenes": [{"start": starts[i], "end": ends[i], "headline": s.get("headline", ""), "visual": s.get("visual") or {}}
+        "broll": broll,
+        "scenes": [{"start": starts[i], "end": ends[i], "headline": s.get("headline", ""), "visual": vis_out[i]}
                    for i, s in enumerate(scenes)],
         "captions": captions,
     }
