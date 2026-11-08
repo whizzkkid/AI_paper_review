@@ -13,6 +13,7 @@ import yaml
 
 from .common import POSTS_DIR, ROOT, list_specs, read_front_matter
 from .generate import ICONS, VISUAL_TYPES
+from .pronounce import load_lexicon, transliterations
 
 REQUIRED = {
     "chat": ["messages"], "bars": ["items"], "line": ["series"], "flow": ["nodes"], "split": ["left", "right"],
@@ -32,9 +33,12 @@ def check_spec(path) -> tuple[list[str], list[str]]:
     if not scenes:
         errors.append("shorts.scenes가 비어 있습니다")
     total = 0
+    lex = load_lexicon(spec)
     for i, s in enumerate(scenes, 1):
         if not str(s.get("narration") or "").strip():
             errors.append(f"장면 {i}: narration이 비어 있습니다")
+        for say, term in transliterations(str(s.get("narration") or ""), lex):
+            warns.append(f"장면 {i}: 자막에 '{say}' → '{term}'로 쓰세요 (음성은 사전대로 '{say}'로 읽습니다)")
         total += len(str(s.get("narration") or ""))
         v = s.get("visual") or {}
         t = v.get("type")

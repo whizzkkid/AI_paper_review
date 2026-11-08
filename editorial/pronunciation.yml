@@ -1,0 +1,35 @@
+# 읽는 법 사전 — 자막(narration)에는 왼쪽 원문 표기를 쓰고, AI 음성은 오른쪽처럼 읽습니다.
+# 음성이 영어 이름을 이상하게 읽으면 여기에 한 줄 추가하세요. (논문 하나에만 쓰는 이름은 shorts/*.yml의 pronunciation:)
+# 한 단어 단위로 바뀝니다. 대소문자를 구분하고, 뒤에 붙은 조사(ICLR의, LARC가)는 그대로 둡니다.
+
+# 학회
+ICLR: 아이클리어
+NeurIPS: 뉴립스
+ICML: 아이씨엠엘
+CVPR: 씨브이피알
+ICCV: 아이씨씨브이
+ECCV: 이씨씨브이
+ACL: 에이씨엘
+EMNLP: 이엠엔엘피
+NAACL: 나클
+AAAI: 트리플에이아이
+COLM: 콜름
+arXiv: 아카이브
+
+# 기관
+KAIST: 카이스트
+POSTECH: 포스텍
+DeepMind: 딥마인드
+OpenAI: 오픈에이아이
+Anthropic: 앤트로픽
+Microsoft: 마이크로소프트
+
+# 모델
+Gemini: 제미나이
+Claude: 클로드
+Llama: 라마
+Qwen: 큐웬
+DeepSeek: 딥시크
+DeepSeek-R1: 딥시크 알원
+Mistral: 미스트랄
+BAGEL: 베이글

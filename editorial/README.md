@@ -7,6 +7,7 @@
 | 블로그 글 | `_posts/<날짜>-<제목>.md` | 머지 후 게시. `exemplar: true`면 다음 생성의 **모범 예시**로 사용 |
 | 쇼츠 대본·화면 | `shorts/<날짜>-<제목>.yml` | 머지 시 이 내용 그대로 영상 렌더링. 예시로도 사용 |
 | 나의 원칙·취향 | `editorial/style-guide.md` | 매 생성 때 Claude가 그대로 읽음 |
+| 영어 이름 읽는 법 | `editorial/pronunciation.yml` | 자막은 원문 표기(ICLR), 음성만 이 사전대로(아이클리어) 읽음 |
 | AI 원본 초안 | `editorial/drafts/` (자동 저장, 직접 수정 X) | 내 수정본과의 **차이**를 분석해 가이드에 규칙을 추가 |
 
 ## 작업 순서
@@ -35,7 +36,15 @@ shorts:
         type: chat
         ...
       memo: 연출 메모(렌더링엔 안 쓰임)
+pronunciation:                 # 이 논문에만 쓰는 이름의 읽는 법 (선택)
+  LARC: 라크
 ```
+
+### 자막은 원문 표기, 음성은 읽는 법
+- `narration`에는 영어 이름을 **원문 그대로** 씁니다: `ICLR 2026 최우수 논문`, `KAIST와 POSTECH`, `Gemini와 Claude`.
+- 음성은 `editorial/pronunciation.yml`(공통)과 대본의 `pronunciation:`(이 논문만)을 보고 `아이클리어`, `카이스트`처럼 읽습니다.
+- 음성이 이상하게 읽는 이름이 있으면 사전에 `이름: 읽는 법` 한 줄을 추가하세요. 대소문자를 구분하고, 뒤에 붙은 조사는 그대로 둡니다.
+- 자막에 `아이클리어`처럼 한글로 적으면 `python -m pipeline.check`가 경고하고, 새 AI 초안에서는 자동으로 원문 표기로 바뀝니다.
 
 ### visual 유형
 | type | 언제 | 주요 필드 |

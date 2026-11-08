@@ -31,6 +31,7 @@ from PIL import Image
 
 from .common import ASSETS_SHORTS_DIR, BUILD_DIR, FONTS_DIR, ROOT, http_get, load_config, load_spec
 from .tts import Word, synthesize
+from .pronounce import load_lexicon, speak, speak_word
 
 STAGE = ROOT / "pipeline" / "video" / "stage.html"
 LEAD, GAP, TAIL = 0.30, 0.35, 1.40   # seconds of silence: start, between scenes, end
@@ -101,19 +102,21 @@ def char_timer(narration: str, words: list[Word] | None, dur: float):
     return lambda c: dur * c / total
 
 
-def build_captions(scenes, raw, timeline, ends, tempo) -> list[dict[str, Any]]:
+def build_captions(scenes, raw, timeline, ends, tempo, lex: dict[str, str] | None = None) -> list[dict[str, Any]]:
+    """Captions show the narration as written; timings follow the spoken form (ICLR is timed as 아이클리어)."""
+    lex = lex or {}
     caps = []
     for i, s in enumerate(scenes):
         n0, n1 = timeline[i]
         words = [(a / tempo, b / tempo, x) for a, b, x in (raw[i][1] or [])] or None
-        at = char_timer(s["narration"], words, n1 - n0)
+        at = char_timer(speak(s["narration"], lex), words, n1 - n0)
         chunks = chunk_caption(s["narration"])
         pos, starts, cw = 0, [], []
         for c in chunks:
             ws = []
             for w in c.split():
                 ws.append({"t": round(n0 + max(0.0, at(pos) - 0.04), 3), "text": w})
-                pos += len(_norm(w))
+                pos += len(_norm(speak_word(w, lex)))
             starts.append(ws[0]["t"])
             cw.append(ws)
         for j, ws in enumerate(cw):
@@ -254,7 +257,8 @@ def render(spec_path: Path, fast: bool = False, sheet_only: bool = False) -> dic
 
     # 1) narration audio per scene (auto speed-up to fit max_seconds)
     print(f"[render] TTS ({vcfg['tts']}) for {len(scenes)} scenes...", file=sys.stderr)
-    raw = [tts_cached(s["narration"], work / "audio" / f"{i:02d}.mp3", vcfg) for i, s in enumerate(scenes)]
+    lex = load_lexicon(spec)
+    raw = [tts_cached(speak(s["narration"], lex), work / "audio" / f"{i:02d}.mp3", vcfg) for i, s in enumerate(scenes)]
     pcm = [decode_pcm(p) for p, _ in raw]
     speech = sum(len(b) / 2 / SAMPLE_RATE for b in pcm)
     fixed = LEAD + GAP * (len(scenes) - 1) + TAIL
@@ -283,7 +287,7 @@ def render(spec_path: Path, fast: bool = False, sheet_only: bool = False) -> dic
         wf.writeframes(bytes(audio))
     starts = [0.0] + [max(0.0, a - 0.2) for a, _ in timeline[1:]]
     ends = starts[1:] + [total]
-    captions = build_captions(scenes, raw, timeline, ends, tempo)
+    captions = build_captions(scenes, raw, timeline, ends, tempo, lex)
     data = stage_data(spec, scenes, starts, ends, captions, total, cfg)
     (work / "stage-data.json").write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
 

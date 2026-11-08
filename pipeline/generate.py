@@ -31,6 +31,7 @@ from .common import (
     now_kst, read_front_matter, save_spec, slugify, spec_path_for,
 )
 from .paper import download_pdf, fetch_paper, pdf_text
+from .pronounce import load_lexicon, lexicon_prompt, restore_terms
 
 # ── schema ────────────────────────────────────────────────────
 
@@ -87,6 +88,7 @@ OUTPUT_SCHEMA = _obj({
     "blog_title": _S, "blog_description": _S, "blog_tags": _arr(_S), "blog_body_markdown": _S,
     "shorts_title": _S, "shorts_title_candidates": _arr(_S), "youtube_description": _S, "youtube_tags": _arr(_S),
     "scenes": _arr(SCENE_SCHEMA),
+    "pronunciation": _arr(_obj({"term": _S, "say": _S})),
     "facts": _arr(_obj({"claim": _S, "evidence_quote": _S, "location": _S})),
 })
 
@@ -111,8 +113,10 @@ BASE_PROMPT = """당신은 AI 분야 박사급 연구자이자, 어려운 논문
 - 1번 장면은 가장 강렬한 시각(논문 결과 그림, 현상을 재현한 대화, 충격적인 수치)으로 시작하는 훅. 2번은 visual.type=paper. 마지막은 cta.
 - 같은 visual.type을 연속으로 쓰지 말고, 제공된 논문 그림 중 결과가 한눈에 보이는 것(정성 비교 이미지, 핵심 그래프)을 최소 한 장면에 씁니다.
 - headline: 한 줄 12자 이내, 최대 2줄(줄바꿈 \\n). 핵심 단어 1개를 **강조**. 이모지 금지. 그래프·그림이 말해주는 장면은 headline을 더 짧게.
-- narration: TTS가 읽는 구어체 존댓말이자 자막. 기호(→, :, /, 괄호)와 이모지 금지. TTS가 잘못 읽기 쉬운 영문 고유명사는
-  한글 발음으로(NeurIPS→뉴립스, ICLR→아이클리어, BAGEL→베이글). GPT, AI 같은 흔한 약어는 그대로.
+- narration: TTS가 읽는 구어체 존댓말이자 화면 자막. 기호(→, :, /, 괄호)와 이모지 금지.
+  영문 고유명사(학회·기관·모델·기법 이름)는 자막에 원문 그대로 씁니다(ICLR, NeurIPS, KAIST, Gemini, LARC). 한글 음차(아이클리어, 뉴립스) 금지.
+  읽는 법은 사전이 음성에만 적용합니다. 아래 사전에 없고 TTS가 잘못 읽기 쉬운 이름(특히 논문의 기법 이름)은
+  pronunciation에 {term: 원문 표기, say: 한글 읽는 법}으로 추가합니다(예: LARC → 라크). 없으면 빈 배열.
 - memo: 편집자를 위한 연출 메모 한 줄.
 
 ## visual.type 목록 (필드는 스키마를 따르고, 해당 없는 필드는 ""·0·[]·false로 채웁니다)
@@ -163,7 +167,11 @@ def exemplars(limit: int = 2) -> list[dict[str, str]]:
 
 def system_prompt() -> str:
     guide = style_guide()
-    return BASE_PROMPT + (f"\n# 편집장 스타일 가이드 (editorial/style-guide.md — 사실성 원칙 다음으로 우선)\n{guide}\n" if guide else "")
+    lex = load_lexicon()
+    out = BASE_PROMPT + (f"\n# 편집장 스타일 가이드 (editorial/style-guide.md — 사실성 원칙 다음으로 우선)\n{guide}\n" if guide else "")
+    if lex:
+        out += f"\n# 읽는 법 사전 (editorial/pronunciation.yml — 음성에만 자동 적용, 자막에는 왼쪽 표기)\n{lexicon_prompt(lex)}\n"
+    return out
 
 
 def _paper_brief(paper: dict[str, Any], figures: list[dict[str, Any]]) -> str:
@@ -287,9 +295,17 @@ def normalize_content(c: dict[str, Any], figures: list[dict[str, Any]] | None = 
     warnings: list[str] = []
     fig_ids = {f["id"] for f in (figures or [])}
     scenes = c["scenes"]
+    shared = load_lexicon()
+    c["pronunciation"] = {str(p.get("term", "")).strip(): str(p.get("say", "")).strip()
+                          for p in (c.get("pronunciation") or []) if isinstance(p, dict)}
+    c["pronunciation"] = {k: v for k, v in c["pronunciation"].items() if k and v and shared.get(k) != v}
+    lex = {**shared, **c["pronunciation"]}
     for i, s in enumerate(scenes):
         s["headline"] = _EMOJI_RE.sub("", s.get("headline", "")).replace("\\n", "\n").strip()
         s["narration"] = _EMOJI_RE.sub("", s["narration"]).strip()
+        s["narration"], found = restore_terms(s["narration"], lex)
+        if found:
+            warnings.append(f"장면 {i + 1}: 자막의 한글 음차를 원문 표기로 바꿈 ({', '.join(f'{a}→{b}' for a, b in found)})")
         v = s.get("visual") or {}
         if v.get("type") not in VISUAL_TYPES:
             warnings.append(f"장면 {i + 1}: 알 수 없는 visual.type '{v.get('type')}' → title로 대체")
@@ -401,6 +417,7 @@ def write_outputs(paper: dict[str, Any], content: dict[str, Any], *, date=None,
             "scenes": [{"headline": s["headline"], "narration": s["narration"], "visual": s["visual"], "memo": s.get("memo", "")}
                        for s in content["scenes"]],
         },
+        "pronunciation": content.get("pronunciation") or {},
         "facts": content["facts"],
         "youtube": {"skip": False, "video_id": "", "url": "", "uploaded_at": ""},
         "generated_at": date.isoformat(timespec="seconds"),

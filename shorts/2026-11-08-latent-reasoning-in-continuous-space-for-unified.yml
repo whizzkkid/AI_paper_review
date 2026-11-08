@@ -2,6 +2,7 @@
 #  쇼츠 대본 원본 — 이 파일을 고치면 승인(머지) 후 영상이 이 내용대로 렌더링됩니다.
 #  scenes[].headline: 화면 상단 문구(**강조**, 줄바꿈 가능) / narration: 음성+자막
 #  scenes[].visual: 장면의 시각화 (type별 필드는 editorial/README.md 참고)
+#  pronunciation: 이 논문에만 쓰는 영어 이름의 읽는 법 (공통은 editorial/pronunciation.yml)
 # ─────────────────────────────────────────────────────────────
 version: 1
 stem: 2026-11-08-latent-reasoning-in-continuous-space-for-unified
@@ -87,7 +88,7 @@ shorts:
   - headline: |-
       KAIST·POSTECH의
       **NeurIPS 2026** 논문
-    narration: 카이스트와 포스텍의 뉴립스 2026 논문, 라크가 이 문제를 풀었습니다.
+    narration: KAIST와 POSTECH의 NeurIPS 2026 논문, LARC가 이 문제를 풀었습니다.
     visual:
       type: paper
       stamp: NeurIPS 2026
@@ -111,7 +112,7 @@ shorts:
       bottom_label: '그림: 연속 벡터 공간'
     memo: 블록 토큰 vs 매끄러운 파형
   - headline: '해법: **벡터로** 생각하기'
-    narration: 라크는 벡터로 생각을 잇고, 그 생각이 그림을 얼마나 도왔는지로 스스로 배웁니다.
+    narration: LARC는 벡터로 생각을 잇고, 그 생각이 그림을 얼마나 도왔는지로 스스로 배웁니다.
     visual:
       type: flow
       direction: column
@@ -143,7 +144,7 @@ shorts:
         label: 정보 이득 보상
     memo: 보상이 잠재 추론으로 되돌아가는 루프
   - headline: 이미지 생성 **점수**
-    narration: 그 결과 베이글의 0.81을 0.88까지 끌어올려, GPT-4o 점수도 넘었어요.
+    narration: 그 결과 BAGEL의 0.81을 0.88까지 끌어올려, GPT-4o 점수도 넘었어요.
     visual:
       type: bars
       unit: ''
@@ -167,7 +168,7 @@ shorts:
   - headline: |-
       더 생각해도
       **시간은 그대로**
-    narration: 속도도 놀라워요. 열 장을 뽑아 고르면 469초, 라크는 열 단계를 생각해도 48초였죠.
+    narration: 속도도 놀라워요. 열 장을 뽑아 고르면 469초, LARC는 열 단계를 생각해도 48초였죠.
     visual:
       type: line
       x_label: 추론량 (뽑은 장 수 N / 잠재 단계 L)
@@ -216,6 +217,8 @@ shorts:
       blog_title: '[NeurIPS 2026] 그림 AI에게 ''단어'' 대신 ''벡터''로 생각하게 했더니'
       button: 구독하고 다음 논문 받기
     memo: 엔딩
+pronunciation:
+  LARC: 라크
 facts:
 - claim: 기존 UMM은 추론 예산을 늘려도 성능이 매끄럽게 오르지 않는다
   evidence_quote: 'prior UMMs fail to scale at test time: unlike in LLMs, increasing the reasoning budget does not yield the smooth performance gains observed on LLM benchmarks'

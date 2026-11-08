@@ -49,6 +49,7 @@ SPEC_HEADER = (
     "#  쇼츠 대본 원본 — 이 파일을 고치면 승인(머지) 후 영상이 이 내용대로 렌더링됩니다.\n"
     "#  scenes[].headline: 화면 상단 문구(**강조**, 줄바꿈 가능) / narration: 음성+자막\n"
     "#  scenes[].visual: 장면의 시각화 (type별 필드는 editorial/README.md 참고)\n"
+    "#  pronunciation: 이 논문에만 쓰는 영어 이름의 읽는 법 (공통은 editorial/pronunciation.yml)\n"
     "# ─────────────────────────────────────────────────────────────\n"
 )
 

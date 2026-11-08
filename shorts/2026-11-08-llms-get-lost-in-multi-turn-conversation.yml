@@ -2,6 +2,7 @@
 #  쇼츠 대본 원본 — 이 파일을 고치면 승인(머지) 후 영상이 이 내용대로 렌더링됩니다.
 #  scenes[].headline: 화면 상단 문구(**강조**, 줄바꿈 가능) / narration: 음성+자막
 #  scenes[].visual: 장면의 시각화 (type별 필드는 editorial/README.md 참고)
+#  pronunciation: 이 논문에만 쓰는 영어 이름의 읽는 법 (공통은 editorial/pronunciation.yml)
 # ─────────────────────────────────────────────────────────────
 version: 1
 stem: 2026-11-08-llms-get-lost-in-multi-turn-conversation
@@ -82,7 +83,7 @@ shorts:
   - headline: |-
       ICLR 2026
       **최우수 논문**
-    narration: 아이클리어 2026 최우수 논문이 20만 번 넘는 대화로 그 이유를 밝혔거든요.
+    narration: ICLR 2026 최우수 논문이 20만 번 넘는 대화로 그 이유를 밝혔거든요.
     visual:
       type: paper
       stamp: ICLR 2026 Outstanding Paper
@@ -101,7 +102,7 @@ shorts:
       label: 15개 LLM · 6개 태스크 **평균 성능 하락**
     memo: 링 게이지가 61%까지만 차오름
   - headline: '**최강 모델도** 예외 없음'
-    narration: GPT-4.1도, 제미나이와 클로드도 예외가 없었죠.
+    narration: GPT-4.1도, Gemini와 Claude도 예외가 없었죠.
     visual:
       type: bars
       unit: '%'
