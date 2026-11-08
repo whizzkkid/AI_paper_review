@@ -1,0 +1,62 @@
+# ② 승인(PR 머지) 후: 머지된 대본으로 쇼츠를 렌더링해 YouTube에 업로드하고,
+#    영상 ID를 블로그 포스트에 기록(→ 포스트에 쇼츠 임베드).
+#    블로그 자체는 main 머지 시 GitHub Pages가 자동으로 게시합니다.
+name: "2) 승인된 쇼츠 YouTube 업로드"
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "shorts/*.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publish-shorts
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    # Settings → Environments → youtube 에서 "Required reviewers"를 켜면
+    # 업로드 직전에 한 번 더 승인 버튼을 누르게 할 수 있습니다(선택).
+    environment: youtube
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install system packages (ffmpeg, poppler)
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg poppler-utils
+
+      - name: Install Python packages
+        run: |
+          pip install -r requirements.txt
+          python -m playwright install --with-deps chromium
+
+      - name: Render & upload approved Shorts
+        env:
+          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+          GOOGLE_TTS_API_KEY: ${{ secrets.GOOGLE_TTS_API_KEY }}
+        run: python -m pipeline.publish
+
+      - name: Record YouTube IDs on main
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add shorts/ _posts/
+          if git diff --staged --quiet; then exit 0; fi
+          git commit -m "chore: record YouTube Shorts IDs"
+          git pull --rebase --autostash origin main
+          git push origin HEAD:main

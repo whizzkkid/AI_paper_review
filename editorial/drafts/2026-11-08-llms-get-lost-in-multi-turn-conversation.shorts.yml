@@ -1,0 +1,238 @@
+# ─────────────────────────────────────────────────────────────
+#  쇼츠 대본 원본 — 이 파일을 고치면 승인(머지) 후 영상이 이 내용대로 렌더링됩니다.
+#  scenes[].headline: 화면 상단 문구(**강조**, 줄바꿈 가능) / narration: 음성+자막
+#  scenes[].visual: 장면의 시각화 (type별 필드는 editorial/README.md 참고)
+# ─────────────────────────────────────────────────────────────
+version: 1
+stem: 2026-11-08-llms-get-lost-in-multi-turn-conversation
+slug: llms-get-lost-in-multi-turn-conversation
+post: _posts/2026-11-08-llms-get-lost-in-multi-turn-conversation.md
+blog_url: https://whizzkkid.github.io/AI_paper_review/posts/llms-get-lost-in-multi-turn-conversation/
+paper:
+  arxiv_id: '2505.06120'
+  title: LLMs Get Lost In Multi-Turn Conversation
+  authors:
+  - Philippe Laban
+  - Hiroaki Hayashi
+  - Yingbo Zhou
+  - Jennifer Neville
+  published: '2025-05-09'
+  organization: Microsoft Research · Salesforce
+  venue:
+    venue: ICLR 2026
+    track: main
+    honor: Outstanding Paper
+    raw: ICLR 2026 Outstanding Paper (https://blog.iclr.cc/2026/04/23/announcing-the-iclr-2026-outstanding-papers/)
+  upvotes: null
+  abs_url: https://arxiv.org/abs/2505.06120
+  pdf_url: https://arxiv.org/pdf/2505.06120
+  hf_url: https://huggingface.co/papers/2505.06120
+  project_page: https://lost-in-conversation.github.io/
+shorts:
+  title: 챗GPT랑 대화가 길어지면 멍청해지는 진짜 이유
+  title_candidates:
+  - AI 성능이 39% 떨어지는 순간, 당신 탓이 아닙니다
+  - ICLR 2026 최우수 논문이 밝힌 긴 대화의 함정
+  - 챗GPT는 새 창에서 한 번에 물어봐야 하는 이유
+  description: |-
+    챗GPT와 대화가 길어질수록 답이 엉망이 되는 이유를 밝힌 ICLR 2026 최우수 논문(Outstanding Paper)을 60초로 정리했습니다.
+    15개 LLM, 20만 건 이상의 시뮬레이션에서 조건을 여러 턴에 나눠 줄 때 성능이 평균 39% 떨어졌고, 원인은 능력 저하보다 불안정성(+112%) 급증이었습니다.
+    해결책: 대화가 꼬이면 조건을 하나로 모아 새 창에서 한 번에 다시 물어보세요.
+  tags:
+  - ICLR 2026
+  - Outstanding Paper
+  - LLM
+  - 챗GPT
+  - 멀티턴 대화
+  - 프롬프트
+  - AI 논문
+  - 논문 리뷰
+  - Microsoft Research
+  - Salesforce
+  - 인공지능
+  - 생성형 AI
+  scenes:
+  - headline: |-
+      조건을 더할수록
+      **엉뚱해진다?**
+    narration: AI한테 조건을 하나씩 추가할수록 답이 엉뚱해지는 경험, 여러분 탓이 아니었어요.
+    visual:
+      type: chat
+      dim_middle: false
+      messages:
+      - role: user
+        text: 숫자 리스트 정렬 함수 짜줘
+        mark: ''
+      - role: ai
+        text: 여기 있어요! sort_list(x)
+        mark: ''
+      - role: user
+        text: 아, 중복은 빼줘
+        mark: ''
+      - role: ai
+        text: 중복 제거 버전이에요
+        mark: ''
+      - role: user
+        text: 그리고 내림차순으로
+        mark: ''
+      - role: ai
+        text: 오름차순 정렬 코드예요!
+        mark: wrong
+    memo: 조건이 쌓일수록 앞 조건을 놓치는 대화 재현
+  - headline: |-
+      ICLR 2026
+      **최우수 논문**
+    narration: 아이클리어 2026 최우수 논문이 20만 번 넘는 대화로 그 이유를 밝혔거든요.
+    visual:
+      type: paper
+      stamp: ICLR 2026 Outstanding Paper
+      orgs:
+      - Microsoft Research
+      - Salesforce Research
+    memo: 논문 첫 페이지 + 수상 도장
+  - headline: 조건을 **나눠서** 주면
+    narration: 같은 문제도 조건을 여러 턴에 나눠 주자, 15개 모델의 성능이 평균 39% 떨어졌습니다.
+    visual:
+      type: stat
+      value: -39%
+      ratio: 0.61
+      tone: bad
+      icon: trending-down
+      label: 15개 LLM · 6개 태스크 **평균 성능 하락**
+    memo: 링 게이지가 61%까지만 차오름
+  - headline: '**최강 모델도** 예외 없음'
+    narration: GPT-4.1도, 제미나이와 클로드도 예외가 없었죠.
+    visual:
+      type: bars
+      unit: '%'
+      baseline: 100
+      baseline_label: 한 번에 물었을 때 100%
+      note: 멀티턴 성능 유지율 · 논문 Table 1
+      items:
+      - label: GPT-4.1
+        value: 61.8
+        highlight: false
+      - label: Gemini 2.5 Pro
+        value: 64.5
+        highlight: false
+      - label: Claude 3.7 Sonnet
+        value: 65.9
+        highlight: true
+      - label: o3
+        value: 64.1
+        highlight: false
+      - label: DeepSeek-R1
+        value: 60.8
+        highlight: false
+    memo: 모든 막대가 100% 기준선 아래
+  - headline: 실력보다 **기복**이 문제
+    narration: 실력이 떨어졌다기보다, 같은 질문에도 결과가 들쭉날쭉해진 게 핵심이에요.
+    visual:
+      type: figure
+      figure_id: Figure 1
+      caption: 논문 Figure 1 · 단일턴 → 멀티턴
+      crop:
+        x: 0.27
+        y: 0.13
+        w: 0.45
+        h: 0.87
+      focus:
+        x: 0
+        y: 0
+        w: 0
+        h: 0
+      highlights:
+      - x: 0.11
+        y: 0.26
+        w: 0.33
+        h: 0.22
+        label: '한 번에: 안정적'
+      - x: 0.64
+        y: 0.44
+        w: 0.33
+        h: 0.25
+        label: '나눠서: 기복 +112%'
+    memo: 모델들이 파란 영역에서 노란 영역으로 이동
+  - headline: |-
+      중간 대화는
+      **흐려진다**
+    narration: 섣불리 답을 내고, 그 답에 집착하고, 중간에 들은 조건은 흐릿해지거든요.
+    visual:
+      type: chat
+      dim_middle: true
+      messages:
+      - role: user
+        text: 회의록 요약해줘
+        mark: ''
+      - role: ai
+        text: 네, 요약했어요!
+        mark: lost
+      - role: user
+        text: 세 줄로만
+        mark: ''
+      - role: user
+        text: 숫자는 꼭 넣고
+        mark: ''
+      - role: user
+        text: 영어로 써줘
+        mark: ''
+      - role: ai
+        text: 'Summary: The meeting covered…'
+        mark: wrong
+    memo: 첫·마지막 턴만 빛나고 중간 턴은 흐려짐 (loss-of-middle-turns)
+  - headline: |-
+      해결책: **새 창**에서
+      한 번에
+    narration: 그러니 대화가 꼬이면, 조건을 하나로 모아 새 창에서 다시 물어보세요.
+    visual:
+      type: steps
+      items:
+      - icon: list-checks
+        text: '"지금까지 조건 정리해줘"'
+      - icon: message-square-plus
+        text: 새 대화창 열기
+      - icon: zap
+        text: 정리본으로 한 번에 질문
+    memo: 논문 Section 7.4의 권고
+  - headline: |-
+      길게 말고
+      **한 번에** 묻자
+    narration: 모델별 수치와 원인 분석은 설명란 블로그에서 확인하세요.
+    visual:
+      type: cta
+      blog_title: '[ICLR 2026 최우수 논문상] 챗GPT는 왜 대화가 길어지면 멍청해질까?'
+      button: 구독하고 다음 논문 받기
+    memo: 엔딩
+facts:
+- claim: ICLR 2026 Outstanding Paper 수상
+  evidence_quote: 'Outstanding Papers: ... LLMs Get Lost In Multi-Turn Conversation, by Philippe Laban, Hiroaki Hayashi, Yingbo Zhou, and Jennifer Neville'
+  location: ICLR 공식 블로그 (2026-04-23)
+- claim: 15개 LLM, 20만 건 이상의 시뮬레이션 대화
+  evidence_quote: We experimented with 15 LLMs, running N = 10 simulations for each pair of model and simulation type, totaling more than 200,000 simulated conversations.
+  location: Section 5
+- claim: 6개 태스크 평균 39% 하락
+  evidence_quote: all the top open- and closed-weight LLMs we test exhibit significantly lower performance in multi-turn conversations than single-turn, with an average drop of 39% across six generation tasks
+  location: Abstract
+- claim: Concat은 Full의 평균 95.1% 유지
+  evidence_quote: CONCAT performance averaging 95.1% of the FULL counterpart
+  location: Section 6.1
+- claim: GPT-4.1 Sharded/Full 61.8%, Claude 3.7 Sonnet 65.9%, Gemini 2.5 Pro 64.5%
+  evidence_quote: The last two columns average the performance drops from the CONCAT and SHARDED compared to the FULL in percentages across the six tasks.
+  location: Table 1
+- claim: 능력 평균 16% 하락, 불안정성 평균 112% 증가
+  evidence_quote: Model aptitude degrades in a non-significant way between the full and sharded settings, with an average drop of 16%. On the other hand, unreliability skyrockets with an average increase of 112%
+  location: Section 6.2
+- claim: '4가지 원인: 섣부른 답, 이전 답 의존, 가운데 턴 소실, 장황함'
+  evidence_quote: We identify four specific causes
+  location: Section 6.2, Appendix F
+- claim: 새 대화에서 조건을 합쳐 다시 묻기 권고
+  evidence_quote: If time allows, try again. ... Consolidate before retrying.
+  location: Section 7.4
+youtube:
+  skip: false
+  video_id: ''
+  url: ''
+  uploaded_at: ''
+generated_at: '2026-11-08T20:30:00+09:00'
+blog_title: '[ICLR 2026 최우수 논문상] 챗GPT는 왜 대화가 길어지면 멍청해질까?'
+exemplar: true

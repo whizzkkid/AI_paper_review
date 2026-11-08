@@ -1,0 +1,13 @@
+# pipeline work dir (PDFs, audio, rendered mp4)
+build/
+# fonts are downloaded at render time
+assets/fonts/
+__pycache__/
+*.pyc
+# never commit Google OAuth client secrets / tokens
+client_secret*.json
+token*.json
+.env
+# Jekyll
+_site/
+.jekyll-cache/

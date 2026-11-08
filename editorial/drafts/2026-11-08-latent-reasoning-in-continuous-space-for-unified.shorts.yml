@@ -1,0 +1,257 @@
+# ─────────────────────────────────────────────────────────────
+#  쇼츠 대본 원본 — 이 파일을 고치면 승인(머지) 후 영상이 이 내용대로 렌더링됩니다.
+#  scenes[].headline: 화면 상단 문구(**강조**, 줄바꿈 가능) / narration: 음성+자막
+#  scenes[].visual: 장면의 시각화 (type별 필드는 editorial/README.md 참고)
+# ─────────────────────────────────────────────────────────────
+version: 1
+stem: 2026-11-08-latent-reasoning-in-continuous-space-for-unified
+slug: latent-reasoning-in-continuous-space-for-unified
+post: _posts/2026-11-08-latent-reasoning-in-continuous-space-for-unified.md
+blog_url: https://whizzkkid.github.io/AI_paper_review/posts/latent-reasoning-in-continuous-space-for-unified/
+paper:
+  arxiv_id: '2610.42149'
+  title: Latent Reasoning in Continuous Space for Unified Multimodal Models
+  authors:
+  - Byungwoo Jeon
+  - Yoonwoo Jeong
+  - Hyunseok Lee
+  - Minsu Cho
+  - Jinwoo Shin
+  published: '2026-10-30'
+  organization: KAIST · POSTECH · RLWRLD
+  venue:
+    venue: NeurIPS 2026
+    track: main
+    honor: ''
+    raw: Published as conference proceeding for NeurIPS 2026. Last two authors advised equally
+  upvotes: 44
+  abs_url: https://arxiv.org/abs/2610.42149
+  pdf_url: https://arxiv.org/pdf/2610.42149
+  hf_url: https://huggingface.co/papers/2610.42149
+  project_page: https://rootyjeon.github.io/larc-umm/
+shorts:
+  title: 그림 AI에게 단어 대신 벡터로 생각하게 했더니 생긴 일
+  title_candidates:
+  - 그림 AI는 왜 생각을 더 해도 안 좋아질까? KAIST의 답
+  - NeurIPS 2026 KAIST 논문, 이미지 AI의 생각법을 바꾸다
+  - 10번 생각하는 데 48초, 새로운 이미지 AI 추론법
+  description: |-
+    그림 AI에게 '생각할 시간'을 더 줘도 그림이 좋아지지 않던 이유는 무엇일까요?
+    KAIST·POSTECH 연구진의 NeurIPS 2026 논문 LARC는 추론을 단어 토큰이 아닌 연속 벡터 공간에서 하도록 바꿔, 베이스 모델 BAGEL 대비 GenEval 0.81 → 0.88을 달성했습니다.
+    잠재 추론 10단계에 48초로, 10장을 뽑아 고르는 방식(469초)보다 훨씬 효율적인 test-time scaling도 보여줍니다.
+  tags:
+  - NeurIPS 2026
+  - KAIST
+  - POSTECH
+  - LARC
+  - 멀티모달
+  - 이미지 생성
+  - AI 논문
+  - 논문 리뷰
+  - test-time scaling
+  - 잠재 추론
+  - 강화학습
+  - 인공지능
+  - 딥러닝
+  scenes:
+  - headline: |-
+      "정면을 봐"를
+      **못 알아듣던** AI
+    narration: 정면을 보는 호랑이를 주문했는데, 기존 모델은 여러 장을 뽑아도 정면을 놓쳤습니다.
+    visual:
+      type: figure
+      figure_id: Figure 3
+      caption: 논문 Figure 3 · 같은 프롬프트, 다른 결과
+      crop:
+        x: 0
+        y: 0
+        w: 1
+        h: 1
+      focus:
+        x: 0.23
+        y: 0.62
+        w: 0.56
+        h: 0.37
+      highlights:
+      - x: 0.255
+        y: 0.648
+        w: 0.245
+        h: 0.288
+        label: 기존 모델
+      - x: 0.515
+        y: 0.648
+        w: 0.247
+        h: 0.288
+        label: LARC
+    memo: 실제 논문 생성 이미지 비교
+  - headline: |-
+      KAIST·POSTECH의
+      **NeurIPS 2026** 논문
+    narration: 카이스트와 포스텍의 뉴립스 2026 논문, 라크가 이 문제를 풀었습니다.
+    visual:
+      type: paper
+      stamp: NeurIPS 2026
+      orgs:
+      - KAIST
+      - POSTECH
+      - RLWRLD
+    memo: 논문 카드 + 학회 도장
+  - headline: 생각하는 **언어**가 달랐다
+    narration: 기존 모델은 끊어진 단어로 생각하지만, 그림은 연속적인 벡터 공간에서 그려지거든요.
+    visual:
+      type: tokens
+      mode: both
+      words:
+      - 정면을
+      - 보는
+      - 호랑이
+      - 줄무늬
+      - 정글
+      top_label: '기존: 단어 토큰으로 생각'
+      bottom_label: '그림: 연속 벡터 공간'
+    memo: 블록 토큰 vs 매끄러운 파형
+  - headline: '해법: **벡터로** 생각하기'
+    narration: 라크는 벡터로 생각을 잇고, 그 생각이 그림을 얼마나 도왔는지로 스스로 배웁니다.
+    visual:
+      type: flow
+      direction: column
+      nodes:
+      - id: p
+        label: 프롬프트
+        sub: '"정면을 보는 호랑이"'
+        icon: message-circle
+        highlight: false
+      - id: l
+        label: 잠재 추론
+        sub: 은닉 상태를 다음 입력으로
+        icon: brain-circuit
+        highlight: true
+      - id: i
+        label: 이미지 생성
+        sub: 추론 궤적을 읽어 그림
+        icon: image
+        highlight: false
+      edges:
+      - from: p
+        to: l
+        label: ''
+      - from: l
+        to: i
+        label: ''
+      - from: i
+        to: l
+        label: 정보 이득 보상
+    memo: 보상이 잠재 추론으로 되돌아가는 루프
+  - headline: 이미지 생성 **점수**
+    narration: 그 결과 베이글의 0.81을 0.88까지 끌어올려, GPT-4o 점수도 넘었어요.
+    visual:
+      type: bars
+      unit: ''
+      baseline: 0
+      baseline_label: ''
+      note: GenEval 종합 점수 · 논문 Table 1
+      items:
+      - label: BAGEL (기존)
+        value: 0.81
+        highlight: false
+      - label: Uni-CoT
+        value: 0.83
+        highlight: false
+      - label: GPT-4o
+        value: 0.84
+        highlight: false
+      - label: LARC
+        value: 0.88
+        highlight: true
+    memo: LARC 막대만 노랗게
+  - headline: |-
+      더 생각해도
+      **시간은 그대로**
+    narration: 속도도 놀라워요. 열 장을 뽑아 고르면 469초, 라크는 열 단계를 생각해도 48초였죠.
+    visual:
+      type: line
+      x_label: 추론량 (뽑은 장 수 N / 잠재 단계 L)
+      y_label: 걸린 시간(초)
+      unit: 초
+      y_from_zero: true
+      note: A100 1장, 샘플당 · 논문 Table 11
+      series:
+      - name: 여러 장 뽑기
+        highlight: false
+        points:
+        - x: 1
+          y: 46.5
+        - x: 2
+          y: 92.8
+        - x: 4
+          y: 187.1
+        - x: 6
+          y: 275.5
+        - x: 8
+          y: 367.7
+        - x: 10
+          y: 469.0
+      - name: LARC
+        highlight: true
+        points:
+        - x: 1
+          y: 46.8
+        - x: 2
+          y: 46.9
+        - x: 4
+          y: 47.0
+        - x: 6
+          y: 47.3
+        - x: 8
+          y: 47.6
+        - x: 10
+          y: 48.0
+    memo: 한 선은 치솟고 한 선은 평평
+  - headline: |-
+      생각의 언어를
+      **바꾸면** 된다
+    narration: 표와 한계 분석까지 정리한 리뷰는 설명란 블로그에서 확인하세요.
+    visual:
+      type: cta
+      blog_title: '[NeurIPS 2026] 그림 AI에게 ''단어'' 대신 ''벡터''로 생각하게 했더니'
+      button: 구독하고 다음 논문 받기
+    memo: 엔딩
+facts:
+- claim: 기존 UMM은 추론 예산을 늘려도 성능이 매끄럽게 오르지 않는다
+  evidence_quote: 'prior UMMs fail to scale at test time: unlike in LLMs, increasing the reasoning budget does not yield the smooth performance gains observed on LLM benchmarks'
+  location: Section 1, Figure 1
+- claim: 원인은 이산 토큰 추론과 연속 공간 이미지 생성의 모달리티 불일치
+  evidence_quote: reasoning is performed in a discrete token space, whereas image generation operates in a continuous latent space
+  location: Abstract, Section 1
+- claim: GenEval 종합 BAGEL 0.81 → LARC 0.88 (GPT-4o 0.84)
+  evidence_quote: LARC achieves state-of-the-art performance on GenEval with a 7%p gain over BAGEL
+  location: Abstract, Table 1
+- claim: 속성 결합 0.63 → 0.78 (+15%p)
+  evidence_quote: The improvement is most pronounced on Attribute Binding, with a +15%p increase over the baseline.
+  location: Section 3.1, Table 1
+- claim: DPG-Bench 85.07 → 90.04, OneIG-Bench +10.2%p
+  evidence_quote: On DPG-Bench, the overall score of LARC improves by +5.8% (85.07 → 90.04) over the base model BAGEL. On OneIG-Bench, LARC yields a +10.2%p gain
+  location: Section 3.1, Table 2-3
+- claim: MIRA 7.5 → 11.7
+  evidence_quote: The most pronounced gain appears on MIRA (7.5 → 11.7)
+  location: Section 3.2, Table 5
+- claim: 토큰 수준 추론은 MIRA를 7.5 → 7.1로 낮춤
+  evidence_quote: Notably, token-level reasoning slightly degrades visual reasoning performance compared to the baseline
+  location: Section 3.4, Table 6
+- claim: Best-of-10 469.0초 vs LARC L=10 48.0초, L=1 대비 1.2초 추가
+  evidence_quote: LARC incurs only a marginal overhead as the number of latent steps increases, requiring additional 1.2 seconds at L = 10 compared to L = 1.
+  location: Appendix D.1, Table 11
+- claim: 1M interleaved 샘플, A100 8장, Stage 1 약 300 / Stage 2 96 GPU시간
+  evidence_quote: All training experiments are conducted with 8× NVIDIA A100s, taking approximately 300 GPU hours in Stage 1 and 96 GPU hours in Stage 2.
+  location: Appendix A
+- claim: 다양성 보상 없으면 코사인 유사도 0.97로 붕괴, MIRA 11.7 → 9.8
+  evidence_quote: removing the diversity reward (λdiv =0) leads to a pairwise cosine similarity of 0.97 across latent steps
+  location: Appendix D.2, Table 12
+youtube:
+  skip: false
+  video_id: ''
+  url: ''
+  uploaded_at: ''
+generated_at: '2026-11-08T20:08:02+09:00'
+blog_title: '[NeurIPS 2026] 그림 AI에게 ''단어'' 대신 ''벡터''로 생각하게 했더니'
+exemplar: true
