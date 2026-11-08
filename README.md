@@ -121,5 +121,5 @@ python -m pipeline.publish --dry-run             # 업로드 없이 배포 단�
 ## 📚 포스팅 목록
 1. **[NeurIPS 2026] 그림 AI에게 '단어' 대신 '벡터'로 생각하게 했더니** — *Latent Reasoning in Continuous Space for Unified Multimodal Models* (KAIST·POSTECH)
    - [블로그](https://whizzkkid.github.io/AI_paper_review/posts/latent-reasoning-in-continuous-space-for-unified/) · [쇼츠 대본](shorts/2026-11-08-latent-reasoning-in-continuous-space-for-unified.md)
-2. **챗GPT는 왜 대화가 길어지면 멍청해질까?** — *LLMs Get Lost In Multi-Turn Conversation* (Salesforce Research)
-   - [블로그](https://whizzkkid.github.io/AI_paper_review/posts/llms-get-lost-in-multi-turn-conversation/) · [쇼츠 대본](shorts/01-llms-get-lost-in-conversation.md)
+2. **[ICLR 2026 최우수 논문상] 챗GPT는 왜 대화가 길어지면 멍청해질까?** — *LLMs Get Lost In Multi-Turn Conversation* (Microsoft Research · Salesforce Research)
+   - [블로그](https://whizzkkid.github.io/AI_paper_review/posts/llms-get-lost-in-multi-turn-conversation/) · [쇼츠 대본](shorts/2026-11-08-llms-get-lost-in-multi-turn-conversation.md)

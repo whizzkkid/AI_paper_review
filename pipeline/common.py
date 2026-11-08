@@ -95,7 +95,7 @@ def http_get_json(url: str, **kw) -> Any:
 
 # ── Front matter ──────────────────────────────────────────────
 
-_FM_RE = re.compile(r"^---\s*\n(.*?)\n---\s*\n", re.S)
+_FM_RE = re.compile(r"^---[ \t]*\n(.*?)\n---[ \t]*\n", re.S)
 
 
 def read_front_matter(path: Path) -> tuple[dict[str, Any], str]:

@@ -404,7 +404,7 @@ def render_scene(s: dict[str, Any], spec: dict[str, Any], w: int, h: int, paper_
                    outline=ACCENT + (255,) if hot else (255, 255, 255, 40), width=4 if hot else 2)
             lf, ll = fit(label, "bold", 44, 30, cw - 50, 2)
             L.text(ll, lf, x0 + cw / 2, y + 44, color=ACCENT if hot else MUTED)
-            vf, vl = fit(value, "black", 130, 60, cw - 40, 2)
+            vf, vl = fit(value, "black", 130, 48, cw - 50, 1)  # numbers shrink, never wrap
             vh = block_height(vl, vf, 1.1)
             L.text(vl, vf, x0 + cw / 2, y + chh / 2 - vh / 2 + 40, color=HILITE if hot else TEXT, line_gap=1.1)
         ax = MARGIN + cw + gap / 2
