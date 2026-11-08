@@ -390,7 +390,7 @@ def write_outputs(paper: dict[str, Any], content: dict[str, Any], *, date=None,
 
     body, fig_files = embed_figures(content["blog_body_markdown"].strip(), paper["arxiv_id"], figures or [], ROOT / "assets")
     footer = ("\n\n---\n\n<small>이 리뷰는 AI(Claude)가 논문 원문을 분석해 초안을 작성하고, "
-              f"작성자({cfg['site']['author']})가 검토·승인한 뒤 게시되었습니다. 수치와 표현은 반드시 원문으로 확인하세요.</small>\n")
+              f"사람이 검토·승인한 뒤 게시되었습니다. 수치와 표현은 반드시 원문으로 확인하세요.</small>\n")
     POSTS_DIR.mkdir(exist_ok=True)
     post_path.write_text(
         "---\n" + yaml.safe_dump(front, allow_unicode=True, sort_keys=False, width=1000) + "---\n\n"

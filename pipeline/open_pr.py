@@ -4,7 +4,7 @@
 Each PR is assigned to the repo owner (GitHub notifies by email / mobile app) and contains the
 post, the Shorts script, a contact sheet preview and a fact-check list. Merging = approval.
 
-    python -m pipeline.open_pr build/manifest.json --assignee whizzkkid
+    python -m pipeline.open_pr build/manifest.json --assignee <내 GitHub ID>
 Requires the `gh` CLI with GH_TOKEN, and the repo setting
 "Allow GitHub Actions to create and approve pull requests".
 """
@@ -133,7 +133,13 @@ def main() -> None:
                "--label", LABEL]
         if args.assignee:
             cmd += ["--assignee", args.assignee]
-        url = sh(*cmd)
+        try:
+            url = sh(*cmd)
+        except Exception:
+            if not args.assignee:
+                raise
+            # an organization (or a bot) cannot be an assignee — open the PR without one
+            url = sh(*[c for c in cmd if c not in ("--assignee", args.assignee)])
         print(f"[open_pr] {url}")
         sh("git", "switch", start)
 

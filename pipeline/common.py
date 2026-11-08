@@ -23,7 +23,7 @@ EDITORIAL_DIR = ROOT / "editorial"
 DRAFTS_DIR = EDITORIAL_DIR / "drafts"
 
 KST = timezone(timedelta(hours=9))
-USER_AGENT = "AI-Paper-Review-Bot/2.0 (+https://github.com/whizzkkid/AI_paper_review)"
+USER_AGENT = "AI-Paper-Review-Bot/2.0"
 
 
 def load_config() -> dict[str, Any]:

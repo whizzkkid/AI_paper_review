@@ -1,10 +1,8 @@
-title: "Donghwan Shin | AI Paper Review"
-email: sdh12391@gmail.com
+title: "AI 논문 60초"
 description: "최신 AI 학회 최고 논문 심층 리뷰 & 60초 쇼츠 아카이브"
 baseurl: "/AI_paper_review"
 url: "https://whizzkkid.github.io"
-author: "신동환 (Donghwan Shin)"
-github_username: whizzkkid
+author: "AI 논문 60초"
 
 markdown: kramdown
 kramdown:
