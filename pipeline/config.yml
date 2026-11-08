@@ -4,7 +4,7 @@
 # ─────────────────────────────────────────────────────────────
 
 site:
-  base_url: "https://whizzkkid.github.io/AI_paper_review"  # 블로그 주소 (쇼츠 설명란 링크에 사용)
+  base_url: "https://ai-paper-review.github.io"  # 블로그 주소 (쇼츠 설명란 링크에 사용)
   channel_name: "AI 논문 60초"                            # 영상 상단 브랜드 문구
   author: "AI 논문 60초"                                # 블로그·영상에 표시되는 이름 (실명 대신 채널명)
   default_visibility: "unlisted"   # 새 글 공개 범위: unlisted(링크만 아는 사람) | public(목록 노출)

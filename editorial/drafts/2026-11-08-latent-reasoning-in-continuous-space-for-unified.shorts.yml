@@ -7,7 +7,7 @@ version: 1
 stem: 2026-11-08-latent-reasoning-in-continuous-space-for-unified
 slug: latent-reasoning-in-continuous-space-for-unified
 post: _posts/2026-11-08-latent-reasoning-in-continuous-space-for-unified.md
-blog_url: https://whizzkkid.github.io/AI_paper_review/posts/latent-reasoning-in-continuous-space-for-unified/
+blog_url: https://ai-paper-review.github.io/posts/latent-reasoning-in-continuous-space-for-unified/
 paper:
   arxiv_id: '2610.42149'
   title: Latent Reasoning in Continuous Space for Unified Multimodal Models

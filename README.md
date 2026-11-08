@@ -4,7 +4,7 @@
 ① 블로그 심층 리뷰와 ② **시각화 중심** 60초 유튜브 쇼츠를 만듭니다. **사람이 승인(PR 머지)해야만** 배포되고,
 **내가 고친 방식(editorial/)을 다음 생성이 따라갑니다.**
 
-- **블로그**: https://whizzkkid.github.io/AI_paper_review/
+- **블로그**: https://ai-paper-review.github.io/
 
 > **현재 상태**: 첫 글·쇼츠를 다듬는 중이라 자동 실행(스케줄)과 YouTube 업로드는 **꺼져 있고**,
 > 블로그 글은 `visibility: unlisted`(목록·검색 비노출)로 게시됩니다. 켜는 방법은 아래 "자동화 켜기" 참고.

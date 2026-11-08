@@ -8,7 +8,7 @@ version: 1
 stem: 2026-11-08-llms-get-lost-in-multi-turn-conversation
 slug: llms-get-lost-in-multi-turn-conversation
 post: _posts/2026-11-08-llms-get-lost-in-multi-turn-conversation.md
-blog_url: https://whizzkkid.github.io/AI_paper_review/posts/llms-get-lost-in-multi-turn-conversation/
+blog_url: https://ai-paper-review.github.io/posts/llms-get-lost-in-multi-turn-conversation/
 paper:
   arxiv_id: '2505.06120'
   title: LLMs Get Lost In Multi-Turn Conversation
