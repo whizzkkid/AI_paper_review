@@ -50,21 +50,11 @@ shorts:
 | `figure` | 논문 실제 그림 | `figure_id: "Figure 3"`, `crop`·`focus`·`highlights`(0~1 좌표), `caption` |
 | `paper` | 논문 소개 | `stamp`(학회/수상), `orgs` |
 | `tokens` | 이산 vs 연속 비유 | `words`, `mode: discrete/continuous/both`, `top_label`, `bottom_label` |
-| `broll` | AI 생성 분위기 영상(전체 배경) | `prompt`(영어), `caption`, `file`(media/broll/… 영상 경로) |
 | `cta` | 마지막 장면 | `blog_title`, `button` |
 | `title` | 그 외 | `icon`, `subtext` |
 
 아이콘 이름은 `pipeline/video/icons.js` 목록(Lucide)에서 고릅니다.
 
-### AI 생성 영상(broll) 만들기 — Higgsfield
-`broll` 장면은 `file:`에 지정한 세로 영상을 장면 전체 배경으로 깔고 그 위에 헤드라인을 얹습니다.
-영상이 없으면 아이콘 화면으로 대체되니, 아래 둘 중 하나로 채웁니다.
-- **대화로 (Higgsfield MCP)**: Higgsfield 커넥터가 연결된 Claude 세션에서
-  "LARC 쇼츠 1번 장면 broll을 만들어줘"라고 하면, 생성한 영상을 `media/broll/<파일명>/scene01.mp4`에 저장하고 `file:`을 채웁니다.
-- **자동으로 (Higgsfield API)**: `pipeline/config.yml`의 `broll.enabled: true` + GitHub Secret `HF_KEY` →
-  리뷰 초안 생성 때 자동으로 만들어 PR에 포함됩니다. 로컬: `HF_KEY=키:시크릿 python -m pipeline.broll shorts/<파일>.yml`
-
-원칙: 개념을 **비유**하는 장면에만, 쇼츠당 2개 이하. 논문 결과·실존 인물처럼 보이게 만들지 않습니다(화면에 "AI 생성 영상" 표시).
 
 ## 미리보기
 ```bash

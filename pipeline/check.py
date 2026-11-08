@@ -16,7 +16,7 @@ from .generate import ICONS, VISUAL_TYPES
 
 REQUIRED = {
     "chat": ["messages"], "bars": ["items"], "line": ["series"], "flow": ["nodes"], "split": ["left", "right"],
-    "stat": ["value"], "steps": ["items"], "figure": ["figure_id"], "tokens": ["words"], "broll": ["prompt"],
+    "stat": ["value"], "steps": ["items"], "figure": ["figure_id"], "tokens": ["words"],
 }
 
 
@@ -44,9 +44,6 @@ def check_spec(path) -> tuple[list[str], list[str]]:
         for field in REQUIRED.get(t, []):
             if not v.get(field):
                 errors.append(f"장면 {i} ({t}): '{field}'가 필요합니다")
-        if t == "broll" and not (v.get("file") and (ROOT / str(v["file"])).exists()):
-            warns.append(f"장면 {i}: broll 영상 파일이 없어 대체 화면으로 렌더링됩니다 "
-                         "(python -m pipeline.broll 또는 Higgsfield MCP로 생성 후 file: 지정)")
         icons = [v.get("icon")] + [n.get("icon") for n in v.get("nodes", []) + v.get("items", []) if isinstance(n, dict)]
         icons += [(v.get(side) or {}).get("icon") for side in ("left", "right")]
         for ic in filter(None, icons):

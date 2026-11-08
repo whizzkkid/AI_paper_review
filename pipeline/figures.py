@@ -31,8 +31,21 @@ def _text(fragment: str) -> str:
     return re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", " ", fragment))).strip()
 
 
-def fetch_figures(arxiv_id: str, dest_dir: Path, max_figures: int = 10) -> list[dict[str, Any]]:
-    """Return [{id: 'Figure 3', file, caption, width, height}] (empty list if no HTML version)."""
+def fetch_figures(arxiv_id: str, dest_dir: Path, max_figures: int = 10, pdf_path: Path | None = None) -> list[dict[str, Any]]:
+    """Return [{id: 'Figure 3', file, caption, width, height}] from the arXiv HTML version, falling back to
+    cropping figures out of the PDF (pdfplumber) when there is no HTML version or it has no figures."""
+    figs = _figures_from_html(arxiv_id, dest_dir, max_figures)
+    if not figs and pdf_path and Path(pdf_path).exists():
+        try:
+            figs = figures_from_pdf(Path(pdf_path), dest_dir, max_figures)
+            print(f"[figures] {arxiv_id}: arXiv HTML 대신 PDF에서 {len(figs)}개 추출", file=sys.stderr)
+        except Exception as e:
+            print(f"[figures] PDF 그림 추출 실패: {e}", file=sys.stderr)
+        (dest_dir / "figures.json").write_text(json.dumps(figs, ensure_ascii=False, indent=2), encoding="utf-8")
+    return figs
+
+
+def _figures_from_html(arxiv_id: str, dest_dir: Path, max_figures: int) -> list[dict[str, Any]]:
     dest_dir.mkdir(parents=True, exist_ok=True)
     cache = dest_dir / "figures.json"
     if cache.exists():
@@ -112,3 +125,70 @@ def embed_figures(markdown: str, arxiv_id: str, figures: list[dict[str, Any]], a
                 f'<p class="fig-cap">그림: 논문 {cap} (출처: arXiv:{arxiv_id})</p>')
 
     return FIG_PLACEHOLDER.sub(repl, markdown), written
+
+
+# ── PDF fallback (pdfplumber) — for papers without an arXiv HTML version ──────────
+
+_PDF_CAP_RE = re.compile(r"^(Figure|Fig\.)\s*(\d+)\s*[:.|]", re.I)
+
+
+def figures_from_pdf(pdf_path: Path, dest_dir: Path, max_figures: int = 10, dpi: int = 170) -> list[dict[str, Any]]:
+    """Crop each "Figure N:" figure from the PDF (pdfplumber): art + its labels between the caption and
+    the closest body text / section heading / page header above it."""
+    import statistics
+
+    import pdfplumber
+
+    dest_dir.mkdir(parents=True, exist_ok=True)
+    figs: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    heading = re.compile(r"^([A-Z]|\d+)(\.\d+)*\.?\s+[A-Z가-힣]")
+    with pdfplumber.open(str(pdf_path)) as pdf:
+        sizes = [round(c["size"], 1) for pg in pdf.pages[:6] for c in pg.chars]
+        body_size = statistics.mode(sizes) if sizes else 10.0
+        for page in pdf.pages:
+            W, H = page.width, page.height
+            lines = page.extract_text_lines(strip=True, return_chars=True)
+            size = lambda o: statistics.median(c["size"] for c in o["chars"]) if o.get("chars") else 0
+            graphics = page.images + page.rects + page.curves + page.lines
+            for ln in lines:
+                m = _PDF_CAP_RE.match(ln["text"])
+                if not m or m.group(2) in seen:
+                    continue
+                if ln["x0"] > W * 0.45:
+                    cx0, cx1 = W * 0.5, W - 20
+                elif ln["x1"] < W * 0.55:
+                    cx0, cx1 = 20, W * 0.5
+                else:
+                    cx0, cx1 = 20, W - 20
+                colw = cx1 - cx0
+                cap_top = ln["top"]
+                in_col = lambda o: o["x1"] > cx0 and o["x0"] < cx1
+                above = [o for o in lines if o["bottom"] < cap_top - 2 and in_col(o) and not _PDF_CAP_RE.match(o["text"])]
+                is_body = lambda o: (o["x1"] - o["x0"]) > 0.72 * colw and abs(size(o) - body_size) < 0.6
+                is_head = lambda o: bool(heading.match(o["text"])) and size(o) >= body_size - 0.2 and (o["x1"] - o["x0"]) < 0.72 * colw
+                bounds = [o["bottom"] for o in above if is_body(o) or is_head(o)] + [H * 0.07]
+                top = max(bounds) + 2
+                if cap_top - top < 50:
+                    continue
+                art = [g for g in graphics if g["bottom"] <= cap_top + 1 and g["top"] >= top - 1 and in_col(g)]
+                if not art:
+                    continue  # no images / vector art → not a figure
+                labels = [o for o in above if o["top"] >= top - 1 and not is_body(o)]
+                boxes = art + labels
+                x0 = max(0, min(b["x0"] for b in boxes) - 6)
+                x1 = min(W, max(b["x1"] for b in boxes) + 6)
+                y0 = max(0, min(b["top"] for b in boxes) - 6)
+                y1 = min(H, cap_top - 2)
+                if (x1 - x0) < 80 or (y1 - y0) < 50:
+                    continue
+                im = page.crop((x0, y0, x1, y1)).to_image(resolution=dpi).original.convert("RGB")
+                seen.add(m.group(2))
+                path = dest_dir / f"figure{m.group(2)}.png"
+                im.save(path)
+                figs.append({"id": f"Figure {m.group(2)}", "file": str(path),
+                             "caption": re.sub(r"\s+", " ", ln["text"]).strip()[:400],
+                             "width": im.width, "height": im.height, "source": "pdf"})
+                if len(figs) >= max_figures:
+                    return figs
+    return figs

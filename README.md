@@ -37,7 +37,11 @@
 `chat`(LLM 현상 재현) · `bars`/`line`/`stat`(애니메이션 차트) · `flow`(다이어그램, 순환 루프) · `split`(기존 vs 제안)
 · `figure`(논문 실제 그림 + 줌인·하이라이트) · `paper`(논문 카드 + 학회 도장) · `tokens`(개념 비유) · `steps` · `cta`
 
-· `broll`(Higgsfield로 만든 AI 분위기 영상 — 선택)
+**소리**: 효과음(말풍선 팝, 장면 전환, 도장, 정답 딩, 숫자 상승음)과 잔잔한 배경음악을 **코드로 직접 합성**해 넣습니다.
+효과음은 각 애니메이션의 타이밍에서 계산되어 화면과 정확히 맞고, 배경음악은 말할 때 자동으로 작아집니다(덕킹).
+샘플·계정·저작권 걱정이 없고, 최종 음량은 YouTube 기준(-14 LUFS)에 맞춥니다. (`config.yml`의 `video.music`, `video.sfx`)
+
+**논문 그림**: arXiv HTML 버전에서 가져오고, HTML이 없으면 PDF에서 "Figure N:" 캡션 위 영역을 잘라냅니다(pdfplumber).
 
 대본은 `shorts/<날짜>-<제목>.yml` — 사람이 읽고 고치기 쉬운 YAML입니다. 필드 설명은 [editorial/README.md](editorial/README.md).
 
@@ -84,16 +88,7 @@ python -m pipeline.render_video shorts/<파일>.yml                # 영상 (1~2
 > ⚠️ 감사(audit)를 받지 않은 API 프로젝트로 올린 영상은 비공개로 제한될 수 있습니다.
 > [YouTube API Services 감사 신청](https://support.google.com/youtube/contact/yt_api_form) 또는 Studio에서 공개 전환.
 
-### 5. (선택) Higgsfield — AI 생성 B-roll 영상
-| 방식 | 언제 | 설정 |
-|---|---|---|
-| **MCP** (대화형) | Claude 세션에서 "이 장면 영상 만들어줘" | [claude.ai 커넥터 설정](https://claude.ai/customize/connectors) → 사용자 지정 커넥터 추가 → URL `https://mcp.higgsfield.ai/mcp` (OAuth 로그인, 플랜 크레딧 차감) → **새 세션**에서 사용 |
-| **API** (자동화) | 리뷰 초안 생성 때 자동 | [Higgsfield 콘솔](https://console.higgsfield.ai)에서 키 발급 → Secret `HF_KEY`(`키:시크릿`) → `config.yml`의 `broll.enabled: true` |
-
-- 기본 모델 `wan/v2.7/text-to-video`(세로 9:16, 2~15초). 비용은 모델·길이별 종량제(초당 과금)라 `broll.max_per_short`로 편당 개수를 제한합니다.
-- 생성된 영상은 `media/broll/`에 저장·커밋되어, 머지 후 재렌더링 때 다시 돈을 내지 않습니다.
-
-### 6. 자동화 켜기 (첫 글·쇼츠를 다듬은 뒤)
+### 5. 자동화 켜기 (첫 글·쇼츠를 다듬은 뒤)
 - 정기 실행: `.github/workflows/generate-review.yml`의 `schedule` 두 줄 주석 해제 (기본: 월·목 08:17 KST)
 - YouTube 업로드: `pipeline/config.yml`의 `youtube.enabled: true`
 - 글 공개: 각 글 front matter의 `visibility: public` (새 글 기본값은 `site.default_visibility`)

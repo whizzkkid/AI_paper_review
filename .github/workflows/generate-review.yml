@@ -53,7 +53,6 @@ jobs:
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           GOOGLE_TTS_API_KEY: ${{ secrets.GOOGLE_TTS_API_KEY }}
-          HF_KEY: ${{ secrets.HF_KEY }}
           ARXIV_ID: ${{ inputs.arxiv_id }}
           EXCLUDE: ${{ steps.open.outputs.ids }}
         run: python -m pipeline.run --arxiv-id "$ARXIV_ID" --exclude "$EXCLUDE"

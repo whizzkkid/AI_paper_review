@@ -164,7 +164,12 @@ def stage_data(spec: dict[str, Any], scenes, starts, ends, captions, total, cfg)
     types = {(s.get("visual") or {}).get("type") for s in scenes}
     figures: dict[str, Any] = {}
     if "figure" in types:
-        for f in fetch_figures(paper["arxiv_id"], BUILD_DIR / paper["arxiv_id"] / "figs"):
+        pdf = None
+        try:
+            pdf = download_pdf(paper, BUILD_DIR / paper["arxiv_id"])
+        except Exception as e:
+            print(f"[warn] PDF 다운로드 실패: {e}", file=sys.stderr)
+        for f in fetch_figures(paper["arxiv_id"], BUILD_DIR / paper["arxiv_id"] / "figs", pdf_path=pdf):
             figures[f["id"]] = {"src": _uri(f["file"]), "w": f["width"], "h": f["height"]}
     page = {"venue": (v["venue"] + (f" {v['honor']}" if v.get("honor") else "")) if v else "",
             "orgs": [o.strip() for o in re.split(r"[·,]", paper.get("organization") or "") if o.strip()]}
@@ -180,24 +185,6 @@ def stage_data(spec: dict[str, Any], scenes, starts, ends, captions, total, cfg)
                 page.update(page1=_uri(top_path), page1_w=top.width, page1_h=top.height)
         except Exception as e:
             print(f"[warn] 논문 첫 페이지 렌더 실패: {e}", file=sys.stderr)
-    from .broll import extract_frames
-
-    fps = cfg["video"]["fps"]
-    broll: dict[str, Any] = {}
-    vis_out = []
-    for i, s in enumerate(scenes):
-        v = dict(s.get("visual") or {})
-        if v.get("type") == "broll":
-            f = ROOT / v["file"] if v.get("file") else None
-            if f and f.exists():
-                d = BUILD_DIR / spec["stem"] / "broll" / f"{i:02d}"
-                broll[str(i)] = {"dir": d.resolve().as_uri() + "/", "count": extract_frames(f, d, fps), "fps": fps}
-                v["key"] = str(i)
-            else:
-                print(f"[render] 장면 {i + 1}: broll 영상 파일이 없어 대체 화면으로 렌더링합니다 "
-                      "(python -m pipeline.broll 또는 Higgsfield MCP로 생성 후 file: 지정)", file=sys.stderr)
-                v = {"type": "title", "icon": "film", "subtext": v.get("caption", "")}
-        vis_out.append(v)
     badge = page["venue"] or "HOT PAPER"
     ref = f"arXiv {paper['arxiv_id']}" + (f"  ·  {paper['organization']}" if paper.get("organization") else "")
     blog = spec["blog_url"].replace("https://", "").rstrip("/")
@@ -210,11 +197,44 @@ def stage_data(spec: dict[str, Any], scenes, starts, ends, captions, total, cfg)
         "blog_title": spec.get("blog_title") or spec["shorts"]["title"],
         "paper": page,
         "figures": figures,
-        "broll": broll,
-        "scenes": [{"start": starts[i], "end": ends[i], "headline": s.get("headline", ""), "visual": vis_out[i]}
+        "scenes": [{"start": starts[i], "end": ends[i], "headline": s.get("headline", ""), "visual": s.get("visual") or {}}
                    for i, s in enumerate(scenes)],
         "captions": captions,
     }
+
+
+# ── sound design: narration + synthesized music bed (ducked) + synced SFX ──
+
+def mix_plan(work: Path, voice_wav: Path, total: float, events: list[dict], vcfg: dict[str, Any]):
+    """ffmpeg audio inputs (#1..) and filter graph producing [a] at about -14 LUFS (YouTube's target)."""
+    from .audio_fx import music_bed, sfx_track, write_wav
+
+    inputs = ["-i", str(voice_wav)]
+    chains, mix, idx = [], ["[v]"], 2
+    music = str(vcfg.get("music", "synth") or "").strip()
+    music_path = None
+    if music == "synth":
+        music_path = write_wav(work / "music.wav", music_bed(total))
+    elif music and (ROOT / music).exists():
+        music_path = ROOT / music
+        inputs += ["-stream_loop", "-1"]
+    if music_path:
+        inputs += ["-i", str(music_path)]
+        gain = 10 ** (float(vcfg.get("music_db", 0)) / 20)
+        chains.append("[1:a]loudnorm=I=-16:TP=-2:LRA=11,aresample=48000,asplit=2[v][vk]")
+        chains.append(f"[{idx}:a]aresample=48000,volume={gain:.3f},afade=t=out:st={max(0.0, total - 1.5):.2f}:d=1.5[m0];"
+                      "[m0][vk]sidechaincompress=threshold=0.02:ratio=4:attack=30:release=650[m]")
+        mix.append("[m]")
+        idx += 1
+    else:
+        chains.append("[1:a]loudnorm=I=-16:TP=-2:LRA=11,aresample=48000[v]")
+    if vcfg.get("sfx", True) and events:
+        inputs += ["-i", str(write_wav(work / "sfx.wav", sfx_track(events, total)))]
+        chains.append(f"[{idx}:a]aresample=48000[s]")
+        mix.append("[s]")
+    tail = "alimiter=limit=0.9:level=false,loudnorm=I=-14:TP=-1.5:LRA=11,aresample=48000[a]"
+    chains.append(("".join(mix) + f"amix=inputs={len(mix)}:normalize=0:duration=first," if len(mix) > 1 else "[v]") + tail)
+    return inputs, ";".join(chains)
 
 
 # ── main render ──────────────────────────────────────────────
@@ -269,21 +289,6 @@ def render(spec_path: Path, fast: bool = False, sheet_only: bool = False) -> dic
 
     # 3) frames (Playwright) → ffmpeg
     out_mp4 = work / f"{stem}.mp4"
-    cmd = ["ffmpeg", "-y", "-loglevel", "error",
-           "-f", "image2pipe", "-framerate", str(FPS), "-c:v", "mjpeg", "-i", "-",
-           "-i", str(voice_wav)]
-    bgm = (vcfg.get("bgm") or "").strip()
-    voice_chain = "[1:a]loudnorm=I=-15:TP=-1.5:LRA=11,aresample=48000[v]"
-    if bgm and (ROOT / bgm).exists():
-        cmd += ["-stream_loop", "-1", "-i", str(ROOT / bgm)]
-        fc = (f"{voice_chain};[2:a]volume={vcfg.get('bgm_volume', 0.07)},"
-              f"afade=t=out:st={max(0.0, total - 1.5):.2f}:d=1.5,aresample=48000[b];"
-              "[v][b]amix=inputs=2:duration=first:normalize=0[a]")
-    else:
-        fc = voice_chain.replace("[v]", "[a]")
-    cmd += ["-filter_complex", fc, "-map", "0:v", "-map", "[a]",
-            "-c:v", "libx264", "-preset", "veryfast" if fast else "medium", "-crf", "20", "-pix_fmt", "yuv420p",
-            "-r", str(FPS), "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart", "-t", f"{total:.3f}", str(out_mp4)]
     n_frames = int(math.ceil(total * FPS))
     print(f"[render] capturing {n_frames} frames ({total:.1f}s)...", file=sys.stderr)
 
@@ -298,6 +303,15 @@ def render(spec_path: Path, fast: bool = False, sheet_only: bool = False) -> dic
         page.on("pageerror", lambda e: errors.append(str(e)))
         page.goto(STAGE.as_uri())
         page.evaluate("d => window.setup(d)", data)
+        events = page.evaluate("() => window.collectEvents()")
+        (work / "sfx-events.json").write_text(json.dumps(events, ensure_ascii=False, indent=1), encoding="utf-8")
+        audio_inputs, fc = mix_plan(work, voice_wav, total, events, vcfg)
+        cmd = (["ffmpeg", "-y", "-loglevel", "error",
+                "-f", "image2pipe", "-framerate", str(FPS), "-c:v", "mjpeg", "-i", "-"] + audio_inputs
+               + ["-filter_complex", fc, "-map", "0:v", "-map", "[a]",
+                  "-c:v", "libx264", "-preset", "veryfast" if fast else "medium", "-crf", "20", "-pix_fmt", "yuv420p",
+                  "-r", str(FPS), "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart", "-t", f"{total:.3f}",
+                  str(out_mp4)])
         if not sheet_only:
             proc = subprocess.Popen(cmd, stdin=subprocess.PIPE)
             try:

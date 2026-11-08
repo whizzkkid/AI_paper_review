@@ -32,15 +32,10 @@ video:
   gcloud_voice: "ko-KR-Chirp3-HD-Charon"
   rate: "+12%"               # 말하기 속도
   max_seconds: 59            # 이 길이를 넘으면 음성을 자동으로 빠르게(최대 1.25배) 맞춤
-  bgm: ""                    # 배경음악 mp3 경로 (예: assets/bgm/tech.mp3). 비우면 BGM 없음. 저작권 free 음원만!
-  bgm_volume: 0.07
+  music: "synth"             # 배경음악: synth(코드로 합성한 무료 음악) | "" (없음) | mp3 경로(저작권 free 음원)
+  music_db: 0                # 배경음악 볼륨 보정(dB). 말할 때는 자동으로 작아집니다(덕킹)
+  sfx: true                  # 애니메이션에 맞춘 효과음(코드로 합성, 저작권 무관)
 
-broll:                       # AI 생성 B-roll 영상 (쇼츠의 훅·비유 장면 배경) — Higgsfield
-  enabled: false             # true로 바꾸고 GitHub Secret HF_KEY("키:시크릿")를 등록하면 자동 생성
-  model: "wan/v2.7/text-to-video"   # Higgsfield API 엔드포인트 (세로 9:16 지원)
-  resolution: "720p"
-  duration: 6                # 초 (2~15). 영상보다 장면이 길면 마지막 프레임에서 천천히 줌
-  max_per_short: 2           # 쇼츠 1편당 최대 개수 (비용 관리)
 
 youtube:
   enabled: false             # 첫 쇼츠를 다듬는 동안 업로드 중지. 준비되면 true로
