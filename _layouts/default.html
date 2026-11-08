@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% if page.title %}{{ page.title }} | {% endif %}{{ site.title }}</title>
+  <meta name="description" content="{{ page.description | default: site.description }}">
+  
+  <!-- Pretendard Font -->
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+
+  <!-- MathJax for LaTeX -->
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']]
+      }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+  <!-- Mermaid.js for Diagrams -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+  <script>mermaid.initialize({startOnLoad:true, theme: 'neutral'});</script>
+
+  <style>
+    :root {
+      --bg: #0d1117;
+      --card-bg: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --text-muted: #8b949e;
+      --primary: #58a6ff;
+      --primary-hover: #79c0ff;
+      --accent: #238636;
+      --code-bg: #1f242c;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding-bottom: 80px;
+    }
+    header {
+      border-bottom: 1px solid var(--border);
+      background-color: rgba(13, 17, 23, 0.85);
+      backdrop-filter: blur(10px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 16px 24px;
+    }
+    .header-inner {
+      max-width: 860px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.95rem;
+      margin-left: 18px;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--primary); }
+    main {
+      max-width: 860px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+    h1, h2, h3, h4 { color: #fff; font-weight: 700; margin-top: 1.8em; margin-bottom: 0.6em; line-height: 1.35; }
+    h1 { font-size: 2rem; margin-top: 0.5em; }
+    h2 { font-size: 1.45rem; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+    h3 { font-size: 1.2rem; }
+    p { margin-bottom: 1.2em; font-size: 1.05rem; }
+    a { color: var(--primary); text-decoration: none; }
+    a:hover { text-decoration: underline; color: var(--primary-hover); }
+    blockquote {
+      border-left: 4px solid var(--primary);
+      padding: 12px 18px;
+      background: var(--card-bg);
+      border-radius: 0 8px 8px 0;
+      color: #c9d1d9;
+      margin: 1.5em 0;
+      font-style: italic;
+    }
+    code {
+      font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, monospace;
+      background: var(--code-bg);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.9em;
+      color: #f0883e;
+    }
+    pre {
+      background: var(--code-bg);
+      padding: 16px;
+      border-radius: 8px;
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      margin: 1.5em 0;
+    }
+    pre code { background: none; padding: 0; color: #e6edf3; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5em 0;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    th, td {
+      padding: 12px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.95rem;
+    }
+    th { background: var(--card-bg); font-weight: 600; color: #fff; }
+    tr:nth-child(even) { background: rgba(255, 255, 255, 0.02); }
+    ul, ol { padding-left: 24px; margin-bottom: 1.2em; }
+    li { margin-bottom: 6px; font-size: 1.02rem; }
+    hr { border: none; border-top: 1px solid var(--border); margin: 2.5em 0; }
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border-radius: 12px;
+      background: rgba(88, 166, 255, 0.15);
+      color: var(--primary);
+      margin-right: 6px;
+    }
+    footer {
+      max-width: 860px;
+      margin: 60px auto 0;
+      padding: 24px 20px 0;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.88rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <a href="{{ site.baseurl }}/" class="logo">
+        <span>🔬</span> {{ site.title }}
+      </a>
+      <nav class="nav-links">
+        <a href="{{ site.baseurl }}/">홈</a>
+        <a href="https://github.com/{{ site.github_username }}" target="_blank">GitHub</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    {{ content }}
+  </main>
+
+  <footer>
+    <p>© 2026 {{ site.author }} · Powered by GitHub Pages</p>
+  </footer>
+</body>
+</html>
