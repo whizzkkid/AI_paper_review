@@ -443,7 +443,7 @@ def main() -> None:
     paper = enrich_paper(paper, extra)
     work = BUILD_DIR / paper["arxiv_id"]
     pdf = download_pdf(paper, work)
-    figures = fetch_figures(paper["arxiv_id"], work / "figs")
+    figures = fetch_figures(paper["arxiv_id"], work / "figs", pdf_path=pdf)
 
     if args.content_json:
         content = json.loads(Path(args.content_json).read_text(encoding="utf-8"))

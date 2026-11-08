@@ -37,6 +37,12 @@
 `chat`(LLM 현상 재현) · `bars`/`line`/`stat`(애니메이션 차트) · `flow`(다이어그램, 순환 루프) · `split`(기존 vs 제안)
 · `figure`(논문 실제 그림 + 줌인·하이라이트) · `paper`(논문 카드 + 학회 도장) · `tokens`(개념 비유) · `steps` · `cta`
 
+**소리**: 효과음(말풍선 팝, 장면 전환, 도장, 정답 딩, 숫자 상승음)과 잔잔한 배경음악을 **코드로 직접 합성**해 넣습니다.
+효과음은 각 애니메이션의 타이밍에서 계산되어 화면과 정확히 맞고, 배경음악은 말할 때 자동으로 작아집니다(덕킹).
+샘플·계정·저작권 걱정이 없고, 최종 음량은 YouTube 기준(-14 LUFS)에 맞춥니다. (`config.yml`의 `video.music`, `video.sfx`)
+
+**논문 그림**: arXiv HTML 버전에서 가져오고, HTML이 없으면 PDF에서 "Figure N:" 캡션 위 영역을 잘라냅니다(pdfplumber).
+
 대본은 `shorts/<날짜>-<제목>.yml` — 사람이 읽고 고치기 쉬운 YAML입니다. 필드 설명은 [editorial/README.md](editorial/README.md).
 
 ```bash

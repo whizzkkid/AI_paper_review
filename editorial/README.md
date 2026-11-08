@@ -55,6 +55,7 @@ shorts:
 
 아이콘 이름은 `pipeline/video/icons.js` 목록(Lucide)에서 고릅니다.
 
+
 ## 미리보기
 ```bash
 python -m pipeline.render_video shorts/<파일>.yml --sheet-only   # 장면 미리보기 이미지만 (빠름)

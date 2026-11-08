@@ -46,7 +46,7 @@ def main() -> None:
         print(f"[run] ▶ arXiv:{paper['arxiv_id']} {paper['title']}", file=sys.stderr)
         work = BUILD_DIR / paper["arxiv_id"]
         pdf = download_pdf(paper, work)
-        figures = fetch_figures(paper["arxiv_id"], work / "figs")
+        figures = fetch_figures(paper["arxiv_id"], work / "figs", pdf_path=pdf)
         content = generate_content(paper, pdf, figures)
         (work / "content.json").write_text(json.dumps(content, ensure_ascii=False, indent=2), encoding="utf-8")
         content, warnings = normalize_content(content, figures)
