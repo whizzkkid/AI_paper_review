@@ -19,6 +19,8 @@ SHORTS_DIR = ROOT / "shorts"
 ASSETS_SHORTS_DIR = ROOT / "assets" / "shorts"
 BUILD_DIR = ROOT / "build"
 FONTS_DIR = ROOT / "assets" / "fonts"
+EDITORIAL_DIR = ROOT / "editorial"
+DRAFTS_DIR = EDITORIAL_DIR / "drafts"
 
 KST = timezone(timedelta(hours=9))
 USER_AGENT = "AI-Paper-Review-Bot/2.0 (+https://github.com/whizzkkid/AI_paper_review)"
@@ -27,6 +29,47 @@ USER_AGENT = "AI-Paper-Review-Bot/2.0 (+https://github.com/whizzkkid/AI_paper_re
 def load_config() -> dict[str, Any]:
     with open(ROOT / "pipeline" / "config.yml", encoding="utf-8") as f:
         return yaml.safe_load(f)
+
+
+# ── Shorts spec (human-editable YAML) ─────────────────────────
+
+class _SpecDumper(yaml.SafeDumper):
+    pass
+
+
+def _str_presenter(dumper: yaml.SafeDumper, data: str):
+    style = "|" if "\n" in data else None
+    return dumper.represent_scalar("tag:yaml.org,2002:str", data, style=style)
+
+
+_SpecDumper.add_representer(str, _str_presenter)
+
+SPEC_HEADER = (
+    "# ─────────────────────────────────────────────────────────────\n"
+    "#  쇼츠 대본 원본 — 이 파일을 고치면 승인(머지) 후 영상이 이 내용대로 렌더링됩니다.\n"
+    "#  scenes[].headline: 화면 상단 문구(**강조**, 줄바꿈 가능) / narration: 음성+자막\n"
+    "#  scenes[].visual: 장면의 시각화 (type별 필드는 editorial/README.md 참고)\n"
+    "# ─────────────────────────────────────────────────────────────\n"
+)
+
+
+def spec_path_for(stem: str) -> Path:
+    return SHORTS_DIR / f"{stem}.yml"
+
+
+def load_spec(path: Path) -> dict[str, Any]:
+    text = Path(path).read_text(encoding="utf-8")
+    return json.loads(text) if str(path).endswith(".json") else yaml.safe_load(text)
+
+
+def save_spec(path: Path, spec: dict[str, Any]) -> None:
+    body = yaml.dump({k: v for k, v in spec.items() if not k.startswith("_")}, Dumper=_SpecDumper,
+                     allow_unicode=True, sort_keys=False, width=1000)
+    Path(path).write_text(SPEC_HEADER + body, encoding="utf-8")
+
+
+def list_specs() -> list[Path]:
+    return sorted(list(SHORTS_DIR.glob("*.yml")) + list(SHORTS_DIR.glob("*.json")))
 
 
 def load_queue() -> dict[str, list[str]]:

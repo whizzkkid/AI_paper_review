@@ -3,8 +3,9 @@
 name: "1) 논문 리뷰 초안 생성 (승인 요청 PR)"
 
 on:
-  schedule:
-    - cron: "17 23 * * 0,3"   # 매주 월·목 08:17 KST (UTC 일·수 23:17)
+  # 첫 글·쇼츠를 다듬는 동안 자동 실행은 꺼 둡니다. 준비되면 아래 두 줄의 주석을 푸세요.
+  # schedule:
+  #   - cron: "17 23 * * 0,3"   # 매주 월·목 08:17 KST (UTC 일·수 23:17)
   workflow_dispatch:
     inputs:
       arxiv_id:
@@ -38,7 +39,9 @@ jobs:
         run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg poppler-utils
 
       - name: Install Python packages
-        run: pip install -r requirements.txt
+        run: |
+          pip install -r requirements.txt
+          python -m playwright install --with-deps chromium
 
       - name: Find papers that already have an open review branch
         id: open

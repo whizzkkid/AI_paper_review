@@ -7,6 +7,7 @@ site:
   base_url: "https://whizzkkid.github.io/AI_paper_review"  # 블로그 주소 (쇼츠 설명란 링크에 사용)
   channel_name: "AI 논문 60초"                            # 영상 상단 브랜드 문구
   author: "신동환"
+  default_visibility: "unlisted"   # 새 글 공개 범위: unlisted(링크만 아는 사람) | public(목록 노출)
 
 claude:
   model: "claude-opus-5-5"   # 리뷰 작성 모델
@@ -35,6 +36,7 @@ video:
   bgm_volume: 0.07
 
 youtube:
+  enabled: false             # 첫 쇼츠를 다듬는 동안 업로드 중지. 준비되면 true로
   privacy: "public"          # public | unlisted | private  (승인 후 업로드 시 적용)
   category_id: "28"          # 28 = Science & Technology
   made_for_kids: false

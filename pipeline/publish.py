@@ -17,15 +17,15 @@ import json
 import sys
 from pathlib import Path
 
-from .common import ROOT, SHORTS_DIR, load_config, now_kst, set_front_matter_key
+from .common import ROOT, list_specs, load_config, load_spec, now_kst, save_spec, set_front_matter_key
 from .render_video import render, youtube_description
 from .youtube import build_metadata, have_credentials, upload
 
 
 def pending_specs() -> list[Path]:
     out = []
-    for p in sorted(SHORTS_DIR.glob("*.json")):
-        spec = json.loads(p.read_text(encoding="utf-8"))
+    for p in list_specs():
+        spec = load_spec(p)
         yt = spec.get("youtube", {})
         if not yt.get("video_id") and not yt.get("skip"):
             out.append(p)
@@ -39,6 +39,9 @@ def main() -> None:
     args = ap.parse_args()
 
     cfg = load_config()
+    if not cfg["youtube"].get("enabled", True) and not args.dry_run:
+        print("[publish] config.yml의 youtube.enabled가 false라 업로드를 하지 않습니다. (블로그만 게시)")
+        return
     specs = [args.spec] if args.spec else pending_specs()
     if not specs:
         print("[publish] 업로드 대기 중인 쇼츠가 없습니다.")
@@ -50,7 +53,7 @@ def main() -> None:
 
     failures = 0
     for spec_path in specs:
-        spec = json.loads(spec_path.read_text(encoding="utf-8"))
+        spec = load_spec(spec_path)
         post = ROOT / spec["post"]
         if not post.exists():
             print(f"[publish] {spec_path.name}: 블로그 포스트가 없어 건너뜀 ({spec['post']})")
@@ -73,7 +76,7 @@ def main() -> None:
             "uploaded_at": now_kst().isoformat(timespec="seconds"),
             "privacy": body["status"]["privacyStatus"],
         })
-        spec_path.write_text(json.dumps(spec, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        save_spec(spec_path, spec)
         set_front_matter_key(post, "youtube_id", video_id)
         print(f"[publish] ✅ https://youtube.com/shorts/{video_id}")
     if failures:

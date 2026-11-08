@@ -18,7 +18,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from .common import ROOT, load_config
+from .common import DRAFTS_DIR, ROOT, load_config, load_spec
 
 LABEL = "needs-approval"
 
@@ -63,7 +63,7 @@ def pr_body(entry: dict, spec: dict, branch: str, repo: str, run_url: str) -> st
         f'<img src="{raw}/assets/shorts/{stem}-sheet.jpg?raw=true" width="720" alt="scene contact sheet">',
         "",
         f"▶️ **영상(mp4) 확인**: [이 실행의 Artifacts → `shorts-preview`]({run_url}#artifacts)",
-        f"📜 대본·타임라인: [`shorts/{stem}.md`]({raw}/shorts/{stem}.md)",
+        f"📜 쇼츠 대본(수정 가능): [`{entry['spec']}`]({raw}/{entry['spec']})",
         "",
         "### 📝 블로그 포스트",
         "",
@@ -87,7 +87,8 @@ def pr_body(entry: dict, spec: dict, branch: str, repo: str, run_url: str) -> st
         f"1. 블로그 포스트가 GitHub Pages에 게시됩니다 → {spec['blog_url']}",
         f"2. `publish` 워크플로가 **머지된 대본으로** 영상을 다시 렌더링해 YouTube에 업로드합니다 (공개 범위: `{privacy}`).",
         "",
-        "- ✏️ 수정이 필요하면 이 브랜치에서 `_posts/…md`나 `shorts/…json`(내레이션·화면 문구)을 고친 뒤 머지하세요.",
+        "- ✏️ 수정이 필요하면 이 브랜치에서 `_posts/…md`(글)나 `shorts/…yml`(내레이션·화면 문구·시각화)을 고친 뒤 머지하세요.",
+        "  고친 내용은 `editorial/drafts/`의 AI 초안과 비교되어 `python -m pipeline.learn`으로 스타일 가이드에 반영됩니다.",
         "- 🙅 거절하려면 PR을 닫고, 다시 추천되지 않도록 `pipeline/queue.yml`의 `skip:`에 "
         f"`\"{p['arxiv_id']}\"`를 추가하세요.",
         "",
@@ -110,13 +111,14 @@ def main() -> None:
     sh("gh", "label", "create", LABEL, "--color", "FBCA04", "--description", "배포 전 승인 필요", "--force", check=False)
 
     for entry in entries:
-        spec = json.loads((ROOT / entry["spec"]).read_text(encoding="utf-8"))
+        spec = load_spec(ROOT / entry["spec"])
         stem = entry["stem"]
         branch = f"auto/review-{entry['arxiv_id']}"
         if sh("git", "ls-remote", "--heads", "origin", branch):
             branch = f"{branch}-{stem[:10]}"
-        files = [entry["post"], entry["spec"], f"shorts/{stem}.md",
-                 f"assets/shorts/{stem}-thumb.jpg", f"assets/shorts/{stem}-sheet.jpg"]
+        files = [entry["post"], entry["spec"], f"assets/shorts/{stem}-thumb.jpg", f"assets/shorts/{stem}-sheet.jpg",
+                 str((DRAFTS_DIR / f"{stem}.post.md").relative_to(ROOT)), str((DRAFTS_DIR / f"{stem}.shorts.yml").relative_to(ROOT))]
+        files += entry.get("assets", [])
         files = [f for f in files if (ROOT / f).exists()]
 
         sh("git", "switch", "-c", branch)

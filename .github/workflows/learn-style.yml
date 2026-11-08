@@ -1,0 +1,45 @@
+# ③ 내가 고친 글·쇼츠(AI 초안 대비 차이)에서 규칙을 뽑아 editorial/style-guide.md 업데이트를 PR로 제안
+name: "3) 편집 내용 학습 → 스타일 가이드 제안"
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  learn:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Python packages
+        run: pip install "anthropic>=2.6.0,<3" "PyYAML>=6.0"
+
+      - name: Learn rules from my edits
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python -m pipeline.learn
+
+      - name: Open PR with the proposed rules
+        env:
+          GH_TOKEN: ${{ github.token }}
+          OWNER: ${{ github.repository_owner }}
+        run: |
+          git add editorial/
+          if git diff --staged --quiet; then echo "변경 없음"; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          branch="auto/style-guide-$(date +%Y%m%d-%H%M)"
+          git switch -c "$branch"
+          git commit -m "style: 편집 내용에서 학습한 규칙 제안"
+          git push -u origin "$branch"
+          gh pr create --base main --head "$branch" --assignee "$OWNER" \
+            --title "[스타일 가이드] 편집 내용에서 학습한 규칙 제안" \
+            --body "AI 초안(editorial/drafts) 대비 내 수정본의 차이에서 뽑은 규칙입니다. editorial/style-guide.md의 '학습된 규칙'을 검토하고, 필요 없는 규칙은 지운 뒤 머지하세요. 머지하면 다음 자동 생성부터 반영됩니다."

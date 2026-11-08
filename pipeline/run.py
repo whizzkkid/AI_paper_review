@@ -15,8 +15,9 @@ import json
 import sys
 from pathlib import Path
 
-from .common import BUILD_DIR, normalize_arxiv_id
+from .common import BUILD_DIR, ROOT, normalize_arxiv_id
 from .discover import discover
+from .figures import fetch_figures
 from .generate import enrich_paper, generate_content, normalize_content, write_outputs
 from .paper import download_pdf, fetch_paper
 from .render_video import render
@@ -45,18 +46,20 @@ def main() -> None:
         print(f"[run] ▶ arXiv:{paper['arxiv_id']} {paper['title']}", file=sys.stderr)
         work = BUILD_DIR / paper["arxiv_id"]
         pdf = download_pdf(paper, work)
-        content = generate_content(paper, pdf)
+        figures = fetch_figures(paper["arxiv_id"], work / "figs")
+        content = generate_content(paper, pdf, figures)
         (work / "content.json").write_text(json.dumps(content, ensure_ascii=False, indent=2), encoding="utf-8")
-        content, warnings = normalize_content(content)
-        spec = write_outputs(paper, content)
+        content, warnings = normalize_content(content, figures)
+        spec = write_outputs(paper, content, figures=figures)
         spec_path = Path(spec.pop("_spec_path"))
         video = None if args.no_video else render(spec_path)
         manifest.append({
             "arxiv_id": paper["arxiv_id"],
             "title": paper["title"],
             "stem": spec["stem"],
-            "spec": f"shorts/{spec['stem']}.json",
+            "spec": str(spec_path.relative_to(ROOT)),
             "post": spec["post"],
+            "assets": spec.get("_assets", []),
             "pick": {k: v for k, v in pick.items() if k in ("source", "upvotes", "score", "venue", "hf_date")},
             "warnings": warnings,
             "video": video,
